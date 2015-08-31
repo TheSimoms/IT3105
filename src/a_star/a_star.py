@@ -1,8 +1,10 @@
-from Node import Node
+import time
+
+from node import Node
 
 
 class AStar:
-    def __init__(self, arc_cost, h, f, get_neighbour_states, node_id, ui, start, end):
+    def __init__(self, arc_cost, h, f, get_neighbour_states, node_id, ui, start, end, sleep_duration):
         self.arc_cost = arc_cost  # g function
         self.h = h  # h function
         self.f = f  # Function for getting next node
@@ -13,6 +15,8 @@ class AStar:
 
         self.start = Node(None, self.arc_cost, self.h(start, end), start, self.node_id(start))  # Start node
         self.end = Node(None, self.arc_cost, 0, end, self.node_id(end))  # End (goal) node
+
+        self.sleep_duration = sleep_duration  # Time to sleep between iterations. So that one can see the steps taken
 
         self.open = []  # List of open nodes
         self.closed = []  # List of closed nodes
@@ -39,8 +43,8 @@ class AStar:
     def pick_next_node(self):
         node = self.f(self.open)
 
-        self.ui(node)
         self.close_node(node)
+        self.ui(node)
 
         return node
 
@@ -73,7 +77,7 @@ class AStar:
             if not self.open:
                 print 'No solution found!'
 
-                exit()
+                return None, self.open, self.closed
 
             node = self.pick_next_node()
 
@@ -91,6 +95,9 @@ class AStar:
                 elif node.g + self.arc_cost(node.state, neighbour.state) < neighbour.g:
                     neighbour.set_new_parent(node)
 
+            if self.sleep_duration:
+                time.sleep(self.sleep_duration)
+
     # Reports the number of open, closed, and total nodes expanded
     @staticmethod
     def report(open_nodes, closed_nodes):
@@ -99,6 +106,11 @@ class AStar:
             len(closed_nodes),
             len(open_nodes)+len(closed_nodes)
         )
+
+        try:
+            input('Press return to continue')
+        except SyntaxError:
+            pass
 
     # Builds the final path. Returns a list of the nodes in the path
     @staticmethod
