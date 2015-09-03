@@ -1,17 +1,33 @@
-class Node:
-    def __init__(self, parent, arc_cost, h, state, node_id):
+class Node(object):
+    def __init__(self, parent, state, end_state):
+        self.state = state  # State of the node
+        self.id = self.generate_id()  # Node identifier
+
         self.parent = None  # Parent node
         self.children = []  # List of children
-
-        self.arc_cost = arc_cost  # g function
+        self.status = None  # State of the node. Either None (not discovered), True (opened) or False (closed)
+        self.end_state = end_state
 
         self.g = 0  # Initial g value. Is updated when a new parent is set
-        self.h = h  # h value
-        self.state = state  # State of the node
-        self.id = node_id  # Node identifier
-        self.status = None  # State of the node. Either None (not discovered), True (opened) or False (closed)
+        self.h = self.heuristic(self.end_state)
 
         self.add_parent(parent)  # Adds initial parent
+
+    # Function for getting neighbour states
+    def generate_neighbours(self, task_space):
+        raise NotImplementedError
+
+    # Node identifier
+    def generate_id(self):
+        raise NotImplementedError
+
+    # h function
+    def heuristic(self, end_state):
+        raise NotImplementedError
+
+    # g function
+    def arc_cost(self, neighbour_state):
+        raise NotImplementedError
 
     # Adds a new child
     def add_child(self, child):
@@ -24,7 +40,7 @@ class Node:
             self.parent = new_parent  # Sets self as children of new parent
             self.parent.children.append(self)  # Adds self as children to new parent
 
-            self.g = new_parent.g + self.arc_cost(new_parent.state, self.state)  # Updates g value
+            self.g = new_parent.g + new_parent.arc_cost(self.state)  # Updates g value
 
     # Removes current parent
     def remove_parent(self):
@@ -39,7 +55,7 @@ class Node:
         # Updates children's g value where necessary
         for child in self.children:
             if child.parent != self:
-                new_g = self.g + self.arc_cost(self.state, child.state)  # Calculates new g for child
+                new_g = self.g + self.arc_cost(child.state)  # Calculates new g for child
 
                 # Sets self as new parent if new g is lower than former g
                 if new_g < child.g:

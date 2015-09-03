@@ -1,21 +1,15 @@
 import time
 
-from node import Node
 
+class AStar(object):
+    def __init__(self, node_class, task_space, start, end, ui, sleep_duration=0.0):
+        self.node_class = node_class  # Node class
 
-class AStar:
-    def __init__(self, arc_cost, h, f, get_neighbour_states, node_id, ui, start, end, sleep_duration):
-        self.arc_cost = arc_cost  # g function
-        self.h = h  # h function
-        self.f = f  # Function for getting next node
+        self.task_space = task_space  # Task space
+        self.start = self.node_class(None, start, end)  # Start node
+        self.end = self.node_class(None, end, end)  # End (goal) node
 
-        self.get_neighbour_states = get_neighbour_states  # Function for getting a node's neighbour states
-        self.node_id = node_id  # Function for generating node ID
-        self.ui = ui  # Function for drawing the UI representation of the solution
-
-        self.start = Node(None, self.arc_cost, self.h(start, end), start, self.node_id(start))  # Start node
-        self.end = Node(None, self.arc_cost, 0, end, self.node_id(end))  # End (goal) node
-
+        self.ui = ui
         self.sleep_duration = sleep_duration  # Time to sleep between iterations. So that one can see the steps taken
 
         self.open = []  # List of open nodes
@@ -24,7 +18,9 @@ class AStar:
         self.id_cache = {self.start.id: self.start}  # For checking if a state has been discovered before
         self.open_node(self.start)  # Adds start node to list of open nodes
 
-        self.run()
+    # Function to pick next node
+    def f(self):
+        raise NotImplementedError
 
     # Adds node to open list. Updates state of node
     def open_node(self, node):
@@ -41,41 +37,18 @@ class AStar:
 
     # Picks the next node to expand and closes it. Also updates ui
     def pick_next_node(self):
-        node = self.f(self.open)
+        node = self.f()
 
         self.close_node(node)
         self.ui(node)
 
         return node
 
-    # Generates a new node
-    def generate_new_node(self, parent, state):
-        node = Node(parent, self.arc_cost, self.h(state, self.end.state), state, self.node_id(state))
-        self.id_cache[node.id] = node
-
-        return node
-
-    # Returns the proper neighbour node; either a new node or the reference to a node.
-    # Updates node children if necessary
-    def get_neighbour_node(self, node, state):
-        neighbour_id = self.node_id(state)
-
-        if neighbour_id == node.id:
-            return
-
-        if neighbour_id in self.id_cache:
-            neighbour = self.id_cache[neighbour_id]
-            node.add_child(neighbour)
-        else:
-            neighbour = self.generate_new_node(node, state)
-
-        return neighbour
-
     # The agenda loop. Finds the path to the goal
     def agenda_loop(self):
         while True:
             if not self.open:
-                print 'No solution found!'
+                print('No solution found!')
 
                 return None, self.open, self.closed
 
@@ -84,15 +57,14 @@ class AStar:
             if node.id == self.end.id:
                 return self.build_path(node), self.open, self.closed
 
-            for neighbour_state in self.get_neighbour_states(node.state):
-                neighbour = self.get_neighbour_node(node, neighbour_state)
-
-                if not neighbour:
-                    continue
+            for neighbour in node.generate_neighbours(self.task_space):
+                if neighbour.id in self.id_cache:
+                    neighbour = self.id_cache[neighbour.id]
 
                 if neighbour.status is None:
+                    self.id_cache[neighbour.id] = neighbour
                     self.open_node(neighbour)
-                elif node.g + self.arc_cost(node.state, neighbour.state) < neighbour.g:
+                elif node.g + node.arc_cost(neighbour.state) < neighbour.g:
                     neighbour.set_new_parent(node)
 
             if self.sleep_duration:
@@ -101,11 +73,11 @@ class AStar:
     # Reports the number of open, closed, and total nodes expanded
     @staticmethod
     def report(open_nodes, closed_nodes):
-        print 'Open: %d, closed: %s, total: %d' % (
+        print('Open: %d, closed: %s, total: %d' % (
             len(open_nodes),
             len(closed_nodes),
             len(open_nodes)+len(closed_nodes)
-        )
+        ))
 
         try:
             input('Press return to continue')

@@ -1,25 +1,17 @@
 import sys
 
-sys.path.insert(0, '../../')
-
-from a_star.a_star import AStar
-from ui import Ui
+from common.a_star.a_star import AStar as BaseAStar
+from modules.module_one.node import Node
+from modules.module_one.ui import Ui
 
 
 class Run:
-    def __init__(self, task_file, sleep_duration):
-        try:
-            self.task_space, self.grid_size, self.start, self.end = self.generate_task(task_file)
+    def __init__(self, task_file, sleep_duration=0.0):
+        self.task_space, self.grid_size, self.start, self.end = self.generate_task(task_file)
 
-            BreadthFirst(self.arc_cost, self.h, self.get_neighbour_states, self.node_id,
-                         Ui('Breadth first', self.task_space).draw_node, self.start, self.end, sleep_duration)
-            DepthFirst(self.arc_cost, self.h, self.get_neighbour_states, self.node_id,
-                       Ui('Depth first', self.task_space).draw_node, self.start, self.end, sleep_duration)
-            BestFirst(self.arc_cost, self.h, self.get_neighbour_states, self.node_id,
-                      Ui('Best first', self.task_space).draw_node, self.start, self.end, sleep_duration)
-        except Exception as e:
-            print 'Error:'
-            print e
+        BreadthFirst(Node, self.task_space, self.start, self.end, sleep_duration)
+        DepthFirst(Node, self.task_space, self.start, self.end, sleep_duration)
+        BestFirst(Node, self.task_space, self.start, self.end, sleep_duration)
 
     @staticmethod
     def input_to_list(input_value):
@@ -36,92 +28,63 @@ class Run:
             for line in input_file:
                 obstacles.append(self.input_to_list(line))
 
-            task_space = [['o' for y in xrange(grid_size[1])] for x in xrange(grid_size[0])]
+            task_space = [['o' for y in range(grid_size[1])] for x in range(grid_size[0])]
 
             for obstacle in obstacles:
-                for x in xrange(obstacle[0], obstacle[0]+obstacle[2]):
-                    for y in xrange(obstacle[1], obstacle[1]+obstacle[3]):
+                for x in range(obstacle[0], obstacle[0]+obstacle[2]):
+                    for y in range(obstacle[1], obstacle[1]+obstacle[3]):
                         task_space[x][y] = 'x'
 
             return task_space, grid_size, start, end
 
-    @staticmethod
-    def arc_cost(parent_state, state):
-        return 1
 
-    @staticmethod
-    def h(state, end_state):
-        return abs(state[0] - end_state[0]) + abs(state[1] - end_state[1])
+class AStar(BaseAStar):
+    def __init__(self, node_class, task_space, start, end, title, sleep_duration=0.0):
+        self.title = title
 
-    @staticmethod
-    def node_id(state):
-        return '%d.%d' % (state[0], state[1])
+        ui = Ui(self.title, task_space).draw_node
 
-    def get_neighbour_states(self, state):
-        neighbour_states = []
+        super(AStar, self).__init__(node_class, task_space, start, end, ui, sleep_duration)
 
-        for i in xrange(-1, 2):
-            x = state[0]+i
+        print('%s:' % self.title)
+        self.run()
+        print('')
 
-            if 0 <= x < self.grid_size[0]:
-                for j in xrange(-1, 2):
-                    y = state[1]+j
-
-                    if 0 <= y < self.grid_size[1] and abs(i) != abs(j):
-                        if [x, y] != state:
-                            if self.task_space[x][y] == 'o':
-                                neighbour_states.append([x, y])
-
-        return neighbour_states
+    def f(self):
+        raise NotImplementedError
 
 
-class BreadthFirst:
-    def __init__(self, arc_cost, h, get_neighbour_states, node_id, ui, start, end, sleep_duration):
-        print('Breadth first:')
+class BreadthFirst(AStar):
+    def __init__(self, node_class, task_space, start, end, sleep_duration=0.0):
+        super(BreadthFirst, self).__init__(node_class, task_space, start, end, 'Breadth first', sleep_duration)
 
-        AStar(arc_cost, h, self.f, get_neighbour_states, node_id, ui, start, end, sleep_duration)
-
-        print
-
-    @staticmethod
-    def f(open_list):
-        return open_list[0]
+    def f(self):
+        return self.open[0]
 
 
-class DepthFirst:
-    def __init__(self, arc_cost, h, get_neighbour_states, node_id, ui, start, end, sleep_duration):
-        print('Depth first:')
+class DepthFirst(AStar):
+    def __init__(self, node_class, task_space, start, end, sleep_duration=0.0):
+        super(DepthFirst, self).__init__(node_class, task_space, start, end, 'Depth first', sleep_duration)
 
-        AStar(arc_cost, h, self.f, get_neighbour_states, node_id, ui, start, end, sleep_duration)
-
-        print
-
-    @staticmethod
-    def f(open_list):
-        return open_list[-1]
+    def f(self):
+        return self.open[-1]
 
 
-class BestFirst:
-    def __init__(self, arc_cost, h, get_neighbour_states, node_id, ui, start, end, sleep_duration):
-        self.end = end
+class BestFirst(AStar):
+    def __init__(self, node_class, task_space, start, end, sleep_duration=0.0):
+        super(BestFirst, self).__init__(node_class, task_space, start, end, 'Best first', sleep_duration)
 
-        print('Best first:')
-
-        AStar(arc_cost, h, self.f, get_neighbour_states, node_id, ui, start, end, sleep_duration)
-
-        print
-
-    def f(self, open_list):
-        return sorted(open_list, key=lambda x: -1 if x.state == self.end else (x.g+x.h))[0]
+    def f(self):
+        return sorted(self.open, key=lambda x: -1 if x.state == self.end.state else (x.g+x.h))[0]
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print 'You need to supply a file containing the problem description'
+        print('You need to supply a file containing the problem description')
     else:
         if len(sys.argv) == 3:
             sleep = float(sys.argv[2])
         else:
-            sleep = 0.5
+            sleep = 0.0
 
         Run(sys.argv[1], sleep)
