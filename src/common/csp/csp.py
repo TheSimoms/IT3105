@@ -8,14 +8,6 @@ class CSP(object):
 
         self.queue = set()
 
-    @staticmethod
-    def satisfies(c, arguments):
-        for variable_combination in list(itertools.product(*arguments)):
-            if apply(c.constraint, variable_combination):
-                return True
-
-        return False
-
     def extend_queue(self, x_star=None, c_k=None):
         for c in self.constraints:
             if c != c_k:
@@ -25,11 +17,11 @@ class CSP(object):
     def revise(self, x, c):
         revised = False
 
-        for i in range(len(self.variables[x])-1, -1, -1):
+        for i in range(len(self.variables[x])):
             arguments = [[self.variables[x][i]] if x == variable
                          else self.variables[variable] for variable in c.variables]
 
-            if not self.satisfies(c, arguments):
+            if not c.satisfies(arguments):
                 self.variables[x].pop(i)
 
                 revised = True
@@ -45,9 +37,16 @@ class CSP(object):
 
             if self.revise(x, c):
                 if not self.variables[x]:
-                    return False
+                    return None
 
                 self.extend_queue(x, c)
+
+        return self.is_solution()
+
+    def is_solution(self):
+        for variable in self.variables:
+            if len(self.variables[variable]) > 1:
+                return False
 
         return True
 
@@ -60,16 +59,20 @@ class CSP(object):
     def gac(self):
         self.initialize()
 
-        if self.domain_filtering_loop():
-            return self.variables
-        else:
-            return None
+        return self.domain_filtering_loop()
 
 
 class ConstraintInstance(object):
     def __init__(self, variables, expression):
         self.variables = variables
         self.constraint = self.generate_function(variables, expression)
+
+    def satisfies(self, arguments):
+        for variable_combination in list(itertools.product(*arguments)):
+            if apply(self.constraint, variable_combination):
+                return True
+
+        return False
 
     @staticmethod
     def generate_function(variables, expression, environment=globals()):
