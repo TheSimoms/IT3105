@@ -4,7 +4,7 @@ from modules.module_one.a_star import AStar
 from modules.module_one.node import Node
 
 
-class Run:
+class ModuleOne:
     def __init__(self, task_file, sleep_duration=0.0):
         self.task_space, self.grid_size, self.start, self.end = self.generate_task(task_file)
 
@@ -70,4 +70,4 @@ if __name__ == '__main__':
         else:
             sleep = 0.0
 
-        Run(sys.argv[1], sleep)
+        ModuleOne(sys.argv[1], sleep)
