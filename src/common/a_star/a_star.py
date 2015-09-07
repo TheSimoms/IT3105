@@ -2,12 +2,10 @@ import time
 
 
 class AStar(object):
-    def __init__(self, node_class, task_space, start, end, ui, sleep_duration=0.0):
-        self.node_class = node_class  # Node class
-
+    def __init__(self, task_space, start, end, ui, sleep_duration=0.0):
         self.task_space = task_space  # Task space
-        self.start = self.node_class(None, start, end)  # Start node
-        self.end = self.node_class(None, end, end)  # End (goal) node
+        self.start = start  # Start node
+        self.end = end  # End (goal) node
 
         self.ui = ui
         self.sleep_duration = sleep_duration  # Time to sleep between iterations. So that one can see the steps taken
@@ -20,7 +18,7 @@ class AStar(object):
 
     # Function to pick next node
     def f(self):
-        raise NotImplementedError
+        return sorted(self.open, key=lambda x: -1 if x.is_solution() else (x.g+x.h))[0]
 
     # Adds node to open list. Updates state of node
     def open_node(self, node):
@@ -71,18 +69,8 @@ class AStar(object):
                 time.sleep(self.sleep_duration)
 
     # Reports the number of open, closed, and total nodes expanded
-    @staticmethod
-    def report(open_nodes, closed_nodes):
-        print('Open: %d, closed: %s, total: %d' % (
-            len(open_nodes),
-            len(closed_nodes),
-            len(open_nodes)+len(closed_nodes)
-        ))
-
-        try:
-            input('Press return to continue')
-        except SyntaxError:
-            pass
+    def report(self, open_nodes, closed_nodes):
+        raise NotImplementedError
 
     # Builds the final path. Returns a list of the nodes in the path
     @staticmethod

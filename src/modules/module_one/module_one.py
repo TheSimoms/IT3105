@@ -6,11 +6,14 @@ from modules.module_one.node import Node
 
 class ModuleOne:
     def __init__(self, task_file, sleep_duration=0.0):
-        self.task_space, self.grid_size, self.start, self.end = self.generate_task(task_file)
+        self.task_space, self.grid_size, self.start_state, self.end_state = self.generate_task(task_file)
+        
+        self.start = Node(None, self.start_state, self.end_state)
+        self.end = Node(None, self.end_state, self.end_state)
 
-        BreadthFirst(Node, self.task_space, self.start, self.end, sleep_duration)
-        DepthFirst(Node, self.task_space, self.start, self.end, sleep_duration)
-        BestFirst(Node, self.task_space, self.start, self.end, sleep_duration)
+        BreadthFirst(self.task_space, self.start, self.end, sleep_duration)
+        DepthFirst(self.task_space, self.start, self.end, sleep_duration)
+        BestFirst(self.task_space, self.start, self.end, sleep_duration)
 
     @staticmethod
     def input_to_list(input_value):
@@ -38,27 +41,24 @@ class ModuleOne:
 
 
 class BreadthFirst(AStar):
-    def __init__(self, node_class, task_space, start, end, sleep_duration=0.0):
-        super(BreadthFirst, self).__init__(node_class, task_space, start, end, 'Breadth first', sleep_duration)
+    def __init__(self, task_space, start, end, sleep_duration=0.0):
+        super(BreadthFirst, self).__init__(task_space, start, end, 'Breadth first', sleep_duration)
 
     def f(self):
         return self.open[0]
 
 
 class DepthFirst(AStar):
-    def __init__(self, node_class, task_space, start, end, sleep_duration=0.0):
-        super(DepthFirst, self).__init__(node_class, task_space, start, end, 'Depth first', sleep_duration)
+    def __init__(self, task_space, start, end, sleep_duration=0.0):
+        super(DepthFirst, self).__init__(task_space, start, end, 'Depth first', sleep_duration)
 
     def f(self):
         return self.open[-1]
 
 
 class BestFirst(AStar):
-    def __init__(self, node_class, task_space, start, end, sleep_duration=0.0):
-        super(BestFirst, self).__init__(node_class, task_space, start, end, 'Best first', sleep_duration)
-
-    def f(self):
-        return sorted(self.open, key=lambda x: -1 if x.state == self.end.state else (x.g+x.h))[0]
+    def __init__(self, task_space, start, end, sleep_duration=0.0):
+        super(BestFirst, self).__init__(task_space, start, end, 'Best first', sleep_duration)
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ class CSP(object):
     def revise(self, x, c):
         revised = False
 
-        for i in range(len(self.variables[x])):
+        for i in range(len(self.variables[x])-1, -1, -1):
             arguments = [[self.variables[x][i]] if x == variable
                          else self.variables[variable] for variable in c.variables]
 

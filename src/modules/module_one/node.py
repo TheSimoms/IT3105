@@ -6,7 +6,7 @@ class Node(BaseNode):
         super(Node, self).__init__(parent, state, end_state)
 
     # Function for getting neighbour states
-    def generate_neighbours(self, task_space):
+    def generate_neighbours(self, task_space=None):
         neighbours = []
         grid_size = [len(task_space), len(task_space[0])]
 
