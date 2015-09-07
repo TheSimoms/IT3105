@@ -28,8 +28,11 @@ class Node(BaseNode):
     def generate_id(self):
         return '%d.%d' % (self.state[0], self.state[1])
 
+    def is_solution(self):
+        return self.state == self.end_state
+
     # h function
-    def heuristic(self, end_state):
+    def heuristic(self, end_state=None):
         return abs(self.state[0] - end_state[0]) + abs(self.state[1] - end_state[1])
 
     # g function

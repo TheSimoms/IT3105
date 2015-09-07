@@ -54,7 +54,7 @@ class AStar(object):
 
             node = self.pick_next_node()
 
-            if node.id == self.end.id:
+            if node.is_solution():
                 return self.build_path(node), self.open, self.closed
 
             for neighbour in node.generate_neighbours(self.task_space):

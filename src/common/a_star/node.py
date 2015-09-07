@@ -1,5 +1,5 @@
 class Node(object):
-    def __init__(self, parent, state, end_state):
+    def __init__(self, parent, state, end_state=None):
         self.state = state  # State of the node
         self.id = self.generate_id()  # Node identifier
 
@@ -14,7 +14,7 @@ class Node(object):
         self.add_parent(parent)  # Adds initial parent
 
     # Function for getting neighbour states
-    def generate_neighbours(self, task_space):
+    def generate_neighbours(self, task_space=None):
         raise NotImplementedError
 
     # Node identifier
@@ -22,11 +22,14 @@ class Node(object):
         raise NotImplementedError
 
     # h function
-    def heuristic(self, end_state):
+    def heuristic(self, end_state=None):
         raise NotImplementedError
 
     # g function
     def arc_cost(self, neighbour_state):
+        raise NotImplementedError
+
+    def is_solution(self):
         raise NotImplementedError
 
     # Adds a new child
