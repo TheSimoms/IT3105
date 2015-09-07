@@ -54,7 +54,8 @@ class CSP(object):
         self.variables[variable] = [value]
 
         self.extend_queue(variable)
-        self.domain_filtering_loop()
+
+        return self.domain_filtering_loop()
 
     def gac(self):
         self.initialize()
