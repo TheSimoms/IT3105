@@ -15,9 +15,11 @@ class Node(BaseNode):
         variables = self.state.variables
         constraints = self.state.constraints
 
+        # Picks the variable with fewest possible values left
         next_variable = min((variable for variable in variables if len(variables[variable]) != 1),
                             key=lambda variable: len(variables[variable]))
 
+        # Adds neighbour for each legal value in the variable's domain. Reruns GAC for each value
         for value in variables[next_variable]:
             csp = CSP(deepcopy(variables), constraints)
 
@@ -30,6 +32,7 @@ class Node(BaseNode):
     def generate_id(self):
         return str([self.state.variables[variable] for variable in sorted(self.state.variables.keys())])
 
+    # Returns whether the node is a solution or not
     def is_solution(self):
         for number_of_values in self.get_number_of_possible_values():
             if number_of_values != 1:
@@ -45,5 +48,6 @@ class Node(BaseNode):
     def arc_cost(self, neighbour_state):
         return 1
 
+    # Returns list of possible values for each variable
     def get_number_of_possible_values(self):
         return [len(values) for values in self.state.variables.values()]

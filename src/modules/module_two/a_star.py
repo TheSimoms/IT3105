@@ -1,27 +1,27 @@
 from common.a_star.a_star import AStar as BaseAStar
-from modules.module_one.ui import Ui
 
 
 class AStar(BaseAStar):
-    def __init__(self, task_space, start, end, title, sleep_duration=0.0):
-        self.title = title
-
-        ui = Ui(self.title, task_space).draw_node
-
-        super(AStar, self).__init__(task_space, start, end, ui, sleep_duration)
-
-        print('%s:' % self.title)
-        self.run()
-        print('')
+    def __init__(self, start, ui, sleep_duration=0.0):
+        super(AStar, self).__init__(None, start, None, ui, sleep_duration)
 
     # Reports the number of open, closed, and total nodes expanded
     @staticmethod
-    def report(open_nodes, closed_nodes):
-        print('Open: %d, closed: %s, total: %d' % (
-            len(open_nodes),
-            len(closed_nodes),
-            len(open_nodes)+len(closed_nodes)
-        ))
+    def report(path, open_nodes, closed_nodes):
+        final_node = path[-1]
+
+        unsatisfied_constraints = sum([1 for constraint in final_node.state.constraints if not constraint.satisfies(
+            [final_node.state.variables[variable] for variable in constraint.variables])])
+        uncolored_vertices = sum([1 for domain in final_node.state.variables.values() if len(domain) != 1])
+
+        print('GAC:')
+        print('- Unsatisfied constraints: %s' % unsatisfied_constraints)
+        print('- Uncolored vertices: %s' % uncolored_vertices)
+
+        print('A*:')
+        print('- Total number of nodes: %s' % (len(open_nodes)+len(closed_nodes)))
+        print('- Number of expanded nodes: %d' % len(closed_nodes))
+        print('- Path length: %d' % len(path))
 
         try:
             input('Press return to continue')

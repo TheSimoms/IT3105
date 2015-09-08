@@ -6,14 +6,16 @@ class CSP(object):
         self.variables = variables  # Dictionary with key variable name and value domain
         self.constraints = constraints  # List of ConstraintInstances
 
-        self.queue = set()
+        self.queue = set()  # Revise queue
 
+    # Extends queue, either filtering on variable, constraint, or both
     def extend_queue(self, x_star=None, c_k=None):
         for c in self.constraints:
             if c != c_k:
                 if x_star in c.variables or x_star is None:
                     self.queue.update([(x, c) for x in c.variables if x != x_star])
 
+    # Revise* function. Removes any illegal values from the domain of x
     def revise(self, x, c):
         revised = False
 
@@ -28,9 +30,11 @@ class CSP(object):
 
         return revised
 
+    # Extends queue with all combinations of variables and constraints
     def initialize(self):
         self.extend_queue()
 
+    # Domain filtering loop. Returns None if no solution is possible, whether a solution is found if not
     def domain_filtering_loop(self):
         while self.queue:
             x, c = self.queue.pop()
@@ -43,6 +47,7 @@ class CSP(object):
 
         return self.is_solution()
 
+    # Returns whether the current state is a solution or not
     def is_solution(self):
         for variable in self.variables:
             if len(self.variables[variable]) > 1:
@@ -50,6 +55,7 @@ class CSP(object):
 
         return True
 
+    # Reruns the algorithm with the assumption that a given variable has taken on a certain value
     def rerun(self, variable, value):
         self.variables[variable] = [value]
 
@@ -57,17 +63,20 @@ class CSP(object):
 
         return self.domain_filtering_loop()
 
+    # The GAC function. Initializes with all combinations of variables and constraints and runs domain filtering loop
     def gac(self):
         self.initialize()
 
         return self.domain_filtering_loop()
 
 
+# A ConstraintInstance hold the constraint itself as a function, and the variables in the constraint
 class ConstraintInstance(object):
     def __init__(self, variables, expression):
         self.variables = variables
         self.constraint = self.generate_function(variables, expression)
 
+    # Checks whether a combination of variable values is valid or not
     def satisfies(self, arguments):
         for variable_combination in list(itertools.product(*arguments)):
             if apply(self.constraint, variable_combination):
@@ -75,6 +84,7 @@ class ConstraintInstance(object):
 
         return False
 
+    # Generates the constraint function from the constraint expression
     @staticmethod
     def generate_function(variables, expression, environment=globals()):
         arguments = ",".join(variables)

@@ -1,5 +1,5 @@
 from threading import Thread
-from Tkinter import Tk, Label, Canvas as BaseCanvas
+from Tkinter import Tk, Canvas as BaseCanvas
 
 
 class Ui(Thread):
@@ -22,10 +22,9 @@ class Ui(Thread):
 
     def run(self):
         self.root_window = Tk()
-        self.root_window.protocol("WM_DELETE_WINDOW", self.callback)
 
-        label = Label(self.root_window, text="GAC + A*")
-        label.pack()
+        self.root_window.protocol('WM_DELETE_WINDOW', self.callback)
+        self.root_window.title('GAC + A*')
 
         self.ui = Canvas(self.root_window, self.vertices, self.edges, self.width, self.height)
         self.ui.pack()
@@ -53,7 +52,8 @@ class Canvas(BaseCanvas):
             )
 
         self.vertices = {
-            vertex_id: self.create_circle(vertex['x'], vertex['y'], 4, fill="black") for vertex_id, vertex in vertices.items()
+            vertex_id: self.create_circle(vertex['x'], vertex['y'], 10, fill="black")
+            for vertex_id, vertex in vertices.items()
         }
 
     def create_circle(self, x, y, r, **kwargs):
