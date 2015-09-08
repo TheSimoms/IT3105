@@ -3,8 +3,8 @@ import itertools
 
 class CSP(object):
     def __init__(self, variables, constraints):
-        self.variables = variables
-        self.constraints = constraints
+        self.variables = variables  # Dictionary with key variable name and value domain
+        self.constraints = constraints  # List of ConstraintInstances
 
         self.queue = set()
 

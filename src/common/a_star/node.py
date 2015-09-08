@@ -6,10 +6,10 @@ class Node(object):
         self.parent = None  # Parent node
         self.children = []  # List of children
         self.status = None  # State of the node. Either None (not discovered), True (opened) or False (closed)
-        self.end_state = end_state
+        self.end_state = end_state  # Goal state
 
         self.g = 0  # Initial g value. Is updated when a new parent is set
-        self.h = self.heuristic(self.end_state)
+        self.h = self.heuristic(self.end_state)  # h value
 
         self.add_parent(parent)  # Adds initial parent
 
@@ -29,6 +29,7 @@ class Node(object):
     def arc_cost(self, neighbour_state):
         raise NotImplementedError
 
+    # Returns whether the node is a solution or not
     def is_solution(self):
         raise NotImplementedError
 
@@ -41,7 +42,7 @@ class Node(object):
     def add_parent(self, new_parent):
         if new_parent:
             self.parent = new_parent  # Sets self as children of new parent
-            self.parent.children.append(self)  # Adds self as children to new parent
+            self.parent.add_child(self)  # Adds self as children to new parent
 
             self.g = new_parent.g + new_parent.arc_cost(self.state)  # Updates g value
 

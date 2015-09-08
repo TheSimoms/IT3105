@@ -13,16 +13,3 @@ class AStar(BaseAStar):
         print('%s:' % self.title)
         self.run()
         print('')
-
-    # Reports the number of open, closed, and total nodes expanded
-    def report(self, open_nodes, closed_nodes):
-        print('Open: %d, closed: %s, total: %d' % (
-            len(open_nodes),
-            len(closed_nodes),
-            len(open_nodes)+len(closed_nodes)
-        ))
-
-        try:
-            input('Press return to continue')
-        except SyntaxError:
-            pass
