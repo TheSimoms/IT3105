@@ -8,8 +8,14 @@ class AStar(BaseAStar):
 
         ui = Ui(self.title, task_space).draw_node
 
-        super(AStar, self).__init__(task_space, start, end, ui, sleep_duration)
+        super(AStar, self).__init__(start, ui, end, task_space, sleep_duration)
 
         print('%s:' % self.title)
         self.run()
+
+        try:
+            input('Press return to continue')
+        except SyntaxError:
+            pass
+
         print('')

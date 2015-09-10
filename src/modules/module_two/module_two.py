@@ -4,6 +4,7 @@ from operator import itemgetter
 
 from common.csp.csp import CSP
 from common.csp.csp import ConstraintInstance
+from common.csp_a_star.csp_a_star import CSPAStar
 
 from modules.module_two.a_star import AStar
 from modules.module_two.node import Node
@@ -21,8 +22,6 @@ class ModuleTwo:
 
         self.colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
         self.number_of_colors = number_of_colors
-
-        self.ui = Ui(self.vertices, self.edges, self.width, self.height)
 
         self.variables = self.generate_variables()
         self.constraints = self.generate_constraints()
@@ -98,18 +97,12 @@ class ModuleTwo:
         return constraints
 
     def run(self):
+        ui = Ui(self.vertices, self.edges, self.width, self.height)
+
         csp = CSP(self.variables, self.constraints)
+        a_star = AStar(Node(None, csp), ui.update_ui, self.sleep_duration)
 
-        result = csp.gac()
-
-        if result:
-            print('Solution found!')
-        elif result is not None:
-            AStar(Node(None, csp), self.ui.update_ui, self.sleep_duration).run()
-
-            self.ui.root_window.quit()
-        else:
-            print('No solution possible')
+        CSPAStar(csp, a_star).run()
 
 
 if __name__ == '__main__':
@@ -119,6 +112,6 @@ if __name__ == '__main__':
         if len(sys.argv) == 4:
             sleep = float(sys.argv[3])
         else:
-            sleep = 0.5
+            sleep = 0.0
 
         ModuleTwo(sys.argv[1], int(sys.argv[2]), sleep)

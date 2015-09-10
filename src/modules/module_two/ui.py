@@ -17,13 +17,13 @@ class Ui(Thread):
 
         self.start()
 
-    def callback(self):
-        self.root_window.quit()
+    def quit(self):
+        self.root_window.destroy()
 
     def run(self):
         self.root_window = Tk()
 
-        self.root_window.protocol('WM_DELETE_WINDOW', self.callback)
+        self.root_window.protocol('WM_DELETE_WINDOW', self.quit)
         self.root_window.title('GAC + A*')
 
         self.ui = Canvas(self.root_window, self.vertices, self.edges, self.width, self.height)

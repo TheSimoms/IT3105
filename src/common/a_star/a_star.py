@@ -2,8 +2,9 @@ import time
 
 
 class AStar(object):
-    def __init__(self, task_space, start, end, ui, sleep_duration=0.0):
-        self.task_space = task_space  # Task space
+    def __init__(self, start, ui=None, end=None, task_space=None, sleep_duration=0.0):
+        self.task_space = task_space  # Task space.May be needed for nodes in order to generate neighbours
+
         self.start = start  # Start node
         self.end = end  # End (goal) node
 
@@ -51,7 +52,7 @@ class AStar(object):
 
             # Search is finished. Return path and lists of nodes
             if node.is_solution():
-                return self.build_path(node), self.open, self.closed
+                return node, self.open, self.closed
 
             # Expand current node
             for neighbour in node.generate_neighbours(self.task_space):
@@ -73,19 +74,15 @@ class AStar(object):
         return None, self.open, self.closed
 
     # Reports the number of open, closed, and total nodes expanded
-    @staticmethod
-    def report(path, open_nodes, closed_nodes):
+    def report(self, final_node, open_nodes, closed_nodes):
+        path = self.build_path(final_node)
+
         print('Path length: %d' % len(path))
         print('Open nodes: %d, closed nodes: %s, total nodes: %d' % (
             len(open_nodes),
             len(closed_nodes),
             len(open_nodes)+len(closed_nodes)
         ))
-
-        try:
-            input('Press return to continue')
-        except SyntaxError:
-            pass
 
     # Builds the final path. Returns a list of the nodes in the path
     @staticmethod
@@ -101,8 +98,8 @@ class AStar(object):
 
     # Runs the A* algorithm. Reports final path
     def run(self):
-        path, open_nodes, closed_nodes = self.agenda_loop()
+        final_node, open_nodes, closed_nodes = self.agenda_loop()
 
-        self.report(path, open_nodes, closed_nodes)
+        self.report(final_node, open_nodes, closed_nodes)
 
-        return path, open_nodes, closed_nodes
+        return final_node, open_nodes, closed_nodes

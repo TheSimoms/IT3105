@@ -34,15 +34,11 @@ class Node(BaseNode):
 
     # Returns whether the node is a solution or not
     def is_solution(self):
-        for number_of_values in self.get_number_of_possible_values():
-            if number_of_values != 1:
-                return False
-
-        return True
+        return reduce(lambda x, y: x*y, self.get_number_of_possible_values()) == 1
 
     # h function
     def heuristic(self, end_state=None):
-        return sum(self.get_number_of_possible_values())
+        return sum(self.get_number_of_possible_values()) - len(self.state.variables)
 
     # g function
     def arc_cost(self, neighbour_state):
