@@ -25,13 +25,13 @@ class Node(object):
     def heuristic(self, end_state=None):
         raise NotImplementedError
 
-    # g function
-    def arc_cost(self, neighbour_state):
-        raise NotImplementedError
-
     # Returns whether the node is a solution or not
     def is_solution(self):
         raise NotImplementedError
+
+    # g function
+    def arc_cost(self, neighbour_state=None):
+        return 1
 
     # Adds a new child
     def add_child(self, child):

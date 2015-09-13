@@ -34,7 +34,3 @@ class Node(BaseNode):
     # h function
     def heuristic(self, end_state=None):
         return abs(self.state[0] - end_state[0]) + abs(self.state[1] - end_state[1])
-
-    # g function
-    def arc_cost(self, neighbour_state):
-        return 1

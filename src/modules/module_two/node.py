@@ -40,10 +40,6 @@ class Node(BaseNode):
     def heuristic(self, end_state=None):
         return sum(self.get_number_of_possible_values()) - len(self.state.variables)
 
-    # g function
-    def arc_cost(self, neighbour_state):
-        return 1
-
     # Returns list of possible values for each variable
     def get_number_of_possible_values(self):
         return [len(values) for values in self.state.variables.values()]
