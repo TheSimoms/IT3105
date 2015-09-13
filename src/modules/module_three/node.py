@@ -34,7 +34,7 @@ class Node(BaseNode):
 
     # Returns whether the node is a solution or not
     def is_solution(self):
-        return not self.h
+        return not sum([len(variable) for variable in self.state.variables.values() if len(variable) != 1])
 
     # h function
     def heuristic(self, end_state=None):

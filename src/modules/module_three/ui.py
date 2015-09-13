@@ -12,6 +12,11 @@ class Ui:
         self.uncertain = (128, 128, 128)
         self.filled = (0, 0, 255)
 
+        self.cell_colors = [
+            self.background,
+            self.filled
+        ]
+
         self.cell_size = 800 / self.dimensions[0]
         self.window_size = [height, self.cell_size * self.dimensions[1]]
 
@@ -41,18 +46,18 @@ class Ui:
 
         variables = node.state.variables
 
-        for x in range(self.dimensions[1]):
+        for x in range(self.dimensions[0]):
             column = variables['c%d' % x]
             column_len = len(column)
 
-            for y in range(self.dimensions[0]):
+            for y in range(self.dimensions[1]):
                 row = variables['r%d' % y]
                 row_len = len(row)
 
                 if column_len > 1 or row_len > 1:
                     color = self.uncertain
                 else:
-                    color = self.filled if int(column[0].string[y]) else self.background
+                    color = self.cell_colors[int(column[0].string[y])]
 
                 self.draw_rect(x, y, color)
                 self.clock.tick(60)

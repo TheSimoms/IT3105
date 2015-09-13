@@ -35,11 +35,11 @@ class ModuleThree:
             rows = []
             columns = []
 
-            for i in xrange(dimensions[0]):
+            for i in xrange(dimensions[1]):
                 rows.append(self.read_integer_list(input_file.readline().strip()))
 
-            for i in xrange(dimensions[1]):
-                columns.append(self.read_integer_list(input_file.readline().strip()))
+            for i in xrange(dimensions[0]):
+                columns.append(self.read_integer_list(input_file.readline().strip())[::-1])
 
             return dimensions, rows, columns
 
@@ -83,13 +83,13 @@ class ModuleThree:
                 permutation_string = ''.join('0' * empty + '1' * filled for empty, filled in segments_combined)
 
                 # Adds the permutation string to the list of permutation for the element
-                permutations[element_id].append(Element(element_id, permutation_string))
+                permutations[element_id].append(ElementPermutation(element_id, permutation_string))
 
         return permutations
 
     def generate_variables(self, rows, columns):
-        self.rows = self.generate_permutations(rows, self.dimensions[1], 'r')
-        self.columns = self.generate_permutations(columns, self.dimensions[0], 'c')
+        self.rows = self.generate_permutations(rows, len(columns), 'r')
+        self.columns = self.generate_permutations(columns, len(rows), 'c')
 
         return dict(self.rows.items() + self.columns.items())
 
@@ -114,10 +114,8 @@ class ModuleThree:
         CSPAStar(csp, a_star).run()
 
 
-class Element(object):
+class ElementPermutation(object):
     def __init__(self, identifier, string):
-        print identifier, string
-
         self.index = int(identifier[1:])
         self.string = string
 
