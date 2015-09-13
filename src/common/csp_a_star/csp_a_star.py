@@ -9,8 +9,9 @@ class CSPAStar(object):
         if result:
             print('Solution found!')
         elif result is not None:
-            print('No solution found. Solving using A*')
+            print('No solution found. Solving using A*.')
 
+        if result is not None:
             return self.a_star.run()
         else:
             print('No solution possible!')
