@@ -41,7 +41,7 @@ class AStar(object):
         self.close_node(node)
 
         if self.ui:
-            self.ui(node)
+            self.ui(node, self.open, self.closed)
 
         return node
 

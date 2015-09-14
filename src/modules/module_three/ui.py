@@ -41,7 +41,7 @@ class Ui:
             ]
         )
 
-    def update_ui(self, node):
+    def update_ui(self, node, open_nodes, closed_nodes):
         self.screen.fill(self.background)
 
         variables = node.state.variables

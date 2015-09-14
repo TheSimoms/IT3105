@@ -11,6 +11,8 @@ class Ui:
         self.wall = (0, 0, 0)
         self.route = (255, 0, 0)
         self.ground = (255, 255, 255)
+        self.open = (127, 127, 127)
+        self.closed = (64, 64, 64)
 
         self.window_size = [800, 800]
         self.cell_size = [self.window_size[0] // len(self.task_space), self.window_size[0] // len(self.task_space[0])]
@@ -32,14 +34,18 @@ class Ui:
                           self.cell_size[0],
                           self.cell_size[1]])
 
-    def draw_node(self, node):
+    def draw_node(self, node, open_nodes, closed_nodes):
         self.screen.fill(self.ground)
+
+        for open_node in open_nodes:
+            self.draw_rect(open_node.state[0], open_node.state[1], self.open)
+
+        for closed_node in closed_nodes:
+            self.draw_rect(closed_node.state[0], closed_node.state[1], self.closed)
 
         for x in xrange(len(self.task_space)):
             for y in xrange(len(self.task_space[x])):
-                cell = self.task_space[x][y]
-
-                if cell == 'x':
+                if self.task_space[x][y] == 'x':
                     self.draw_rect(x, y, self.wall)
 
         while node:

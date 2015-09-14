@@ -31,9 +31,9 @@ class Ui(Thread):
 
         self.root_window.mainloop()
 
-    def update_ui(self, node):
+    def update_ui(self, node, open_nodes, closed_nodes):
         if self.ui:
-            self.ui.update_ui(node)
+            self.ui.update_ui(node, open_nodes, closed_nodes)
 
 
 class Canvas(BaseCanvas):
@@ -62,7 +62,7 @@ class Canvas(BaseCanvas):
     def set_vertex_color(self, color, vertex_id):
         self.itemconfig(self.vertices[vertex_id], fill=color)
 
-    def update_ui(self, node):
+    def update_ui(self, node, open_nodes, closed_nodes):
         variables = node.state.variables
 
         for variable, domain in variables.items():
