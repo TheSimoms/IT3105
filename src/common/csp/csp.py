@@ -20,8 +20,8 @@ class CSP(object):
         revised = False
 
         for i in range(len(self.variables[x])-1, -1, -1):
-            arguments = [[self.variables[x][i]] if x == variable
-                         else self.variables[variable] for variable in c.variables]
+            arguments = [[self.variables[x][i]] if x == variable else
+                         self.variables[variable] for variable in c.variables]
 
             if not c.satisfies(arguments):
                 self.variables[x].pop(i)
@@ -29,10 +29,6 @@ class CSP(object):
                 revised = True
 
         return revised
-
-    # Extends queue with all combinations of variables and constraints
-    def initialize(self):
-        self.extend_queue()
 
     # Domain filtering loop. Returns None if no solution is possible, whether a solution is found if not
     def domain_filtering_loop(self):
@@ -58,14 +54,13 @@ class CSP(object):
     # Reruns the algorithm with the assumption that a given variable has taken on a certain value
     def rerun(self, variable, value):
         self.variables[variable] = [value]
-
         self.extend_queue(variable)
 
         return self.domain_filtering_loop()
 
     # The GAC function. Initializes with all combinations of variables and constraints and runs domain filtering loop
     def gac(self):
-        self.initialize()
+        self.extend_queue()
 
         return self.domain_filtering_loop()
 

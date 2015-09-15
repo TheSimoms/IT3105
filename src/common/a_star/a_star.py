@@ -19,12 +19,13 @@ class AStar(object):
 
     # Function to pick next node
     def f(self):
-        return sorted(self.open, key=lambda x: -1 if x.is_solution() else (x.g+x.h))[0]
+        return min(self.open, key=lambda x: -1 if x.is_solution() else (x.g+x.h))
 
     # Adds node to open list. Updates state of node
     def open_node(self, node):
         node.status = True
 
+        self.id_cache[node.id] = node
         self.open.append(node)
 
     # Adds node to closed list. Updates state of node
@@ -64,7 +65,6 @@ class AStar(object):
                         neighbour.set_new_parent(node)
                 else:
                     self.open_node(neighbour)
-                    self.id_cache[neighbour.id] = neighbour
 
             if self.sleep_duration:
                 time.sleep(self.sleep_duration)
