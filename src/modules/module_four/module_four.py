@@ -1,6 +1,5 @@
 import sys
 
-from modules.module_four.ui import Ui
 from modules.module_four.twenty_forty_eight import TwentyFortyEight
 
 
@@ -12,9 +11,9 @@ class ModuleFour:
         self.run()
 
     def run(self):
-        # ui = Ui(self.height)
-
         twenty_forty_eight = TwentyFortyEight()
+
+        print twenty_forty_eight.game_board.smoothness()
 
 
 if __name__ == '__main__':
