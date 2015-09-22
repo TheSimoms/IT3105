@@ -14,6 +14,8 @@ class ModuleFour:
         twenty_forty_eight = TwentyFortyEight()
 
         print twenty_forty_eight.game_board.smoothness()
+        print twenty_forty_eight.game_board.monotonicity()
+        print twenty_forty_eight.game_board.get_max_value()
 
 
 if __name__ == '__main__':
