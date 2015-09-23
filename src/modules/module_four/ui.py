@@ -29,12 +29,18 @@ class Ui:
         ]
 
         self.cell_size = height / 4
+        self.font_size = self.cell_size / 2
+
         self.window_size = [height, self.cell_size * 4]
 
-        self.init_game('Nonogram')
+        self.font = None
+
+        self.init_game('2048')
 
     def init_game(self, title):
         pygame.init()
+
+        self.font = pygame.font.SysFont('Comic Sans MS', self.font_size)
 
         self.screen = pygame.display.set_mode(self.window_size)
         self.clock = pygame.time.Clock()
@@ -52,15 +58,22 @@ class Ui:
             ]
         )
 
+    def draw_text(self, x, y, value):
+        self.screen.blit(
+            self.font.render(value, 1, (0, 0, 0)),
+            (self.cell_size * (0.5 + x) - 0.20*self.font_size, self.cell_size * (0.5 + y) - 0.20*self.font_size))
+
     def update_ui(self, state):
         self.screen.fill(self.background)
 
         for x in [0, 1, 2, 3]:
             for y in [0, 1, 2, 3]:
-                cell = int(state[y*4+x])
+                cell = state[x][y]
 
                 if cell:
-                    self.draw_rect(x, y, self.cell_colors[cell])
+                    self.draw_rect(x, y, self.cell_colors[cell.value])
+                    self.draw_text(x, y, str(2 ** cell.value))
+
                     self.clock.tick(60)
 
         pygame.display.update()
