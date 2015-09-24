@@ -1,21 +1,21 @@
 import sys
 
 from modules.module_four.twenty_forty_eight import TwentyFortyEight
+from modules.module_four.ui import Ui
 
 
 class ModuleFour:
     def __init__(self, sleep_duration=0.0, height=800):
-        self.height = height
         self.sleep_duration = sleep_duration
+
+        self.ui = Ui(height)
 
         self.run()
 
     def run(self):
-        twenty_forty_eight = TwentyFortyEight()
+        twenty_forty_eight = TwentyFortyEight(2, self.ui)
 
-        print twenty_forty_eight.game_board.smoothness()
-        print twenty_forty_eight.game_board.monotonicity()
-        print twenty_forty_eight.game_board.get_max_value()
+        twenty_forty_eight.run()
 
 
 if __name__ == '__main__':

@@ -10,10 +10,10 @@ class GameBoard:
         self.make_computer_move()
 
         self.directions = {
-            'up': [0, -1],
-            'right': [1, 0],
-            'down': [0, 1],
-            'left': [-1, 0],
+            'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
+            'right': [[1, 0], [[3, 2, 1, 0], [0, 1, 2, 3]]],
+            'down': [[0, 1], [[0, 1, 2, 3], [3, 2, 1, 0]]],
+            'left': [[-1, 0], [[0, 1, 2, 3], [0, 1, 2, 3]]]
         }
 
     @staticmethod
@@ -28,14 +28,14 @@ class GameBoard:
 
         return False
 
+    def is_game_over(self):
+        return self.get_number_of_empty_cells() == 0
+
     def get_empty_cells(self):
         return [[x, y] for y in [0, 1, 2, 3] for x in [0, 1, 2, 3] if not self.get_value_at_position(x, y)]
 
     def get_number_of_empty_cells(self):
         return len(self.get_empty_cells())
-
-    def get_cell_at_index(self, index):
-        return self.get_cell_at_position(index[0], index[1])
 
     def get_cell_at_position(self, x, y):
         if 0 <= x <= 3 and 0 <= y <= 3:
@@ -43,12 +43,14 @@ class GameBoard:
         else:
             return None
 
-    def get_value_at_position(self, x, y):
-        if 0 <= x <= 3 and 0 <= y <= 3:
-            cell = self.get_cell_at_position(x, y)
+    def get_cell_at_index(self, index):
+        return self.get_cell_at_position(index[0], index[1])
 
-            if cell:
-                return cell.value
+    def get_value_at_position(self, x, y):
+        cell = self.get_cell_at_position(x, y)
+
+        if cell:
+            return cell.value
 
         return 0
 
@@ -56,10 +58,7 @@ class GameBoard:
         return self.get_value_at_position(i // 3, i % 3)
 
     def get_value_at_index(self, index):
-        if index is not None:
-            return self.get_value_at_position(index[0], index[1])
-        else:
-            return 0
+        return self.get_value_at_position(index[0], index[1])
 
     def get_value_at_cell(self, cell):
         if cell:
@@ -68,7 +67,7 @@ class GameBoard:
             return 0
 
     def is_index_occupied(self, index):
-        return True if self.get_value_at_index(index) else False
+        return self.get_value_at_index(index) > 0
 
     def prepare_cells_for_move(self):
         for x in [0, 1, 2, 3]:
@@ -76,7 +75,7 @@ class GameBoard:
                 cell = self.get_cell_at_position(x, y)
 
                 if cell:
-                    cell.merge_parents = None
+                    cell.merged = False
                     cell.previous_position = cell.position[:]
 
     @staticmethod
@@ -84,41 +83,20 @@ class GameBoard:
         return choice([1, 2], p=[0.9, 0.1])
 
     def get_closest_neighbour(self, curr, step):
-        print curr
-        print step
-
         prev = curr
         curr = list(add(curr, step))
-
-        print prev
-        print curr
 
         while 0 <= curr[0] <= 3 and 0 <= curr[1] <= 3 and not self.get_value_at_index(curr):
             prev = curr
             curr = list(add(curr, step))
 
-            print prev
-            print curr
-
-        print
-
         return [prev, curr]
 
-    def empty_cell(self, x, y):
-        self.state[x][y] = None
-
     def remove_cell_from_grid(self, cell):
-        self.empty_cell(cell.position[0], cell.position[1])
+        self.state[cell.position[0]][cell.position[1]] = None
 
     def add_cell_to_grid(self, cell):
         self.state[cell.position[0]][cell.position[1]] = cell
-
-    @staticmethod
-    def generate_steps(direction_vector):
-        return [
-            [3, 2, 1, 0] if direction_vector[0] == 1 else [0, 1, 2, 3],
-            [3, 2, 1, 0] if direction_vector[1] == 1 else [0, 1, 2, 3],
-        ]
 
     def move_cell(self, cell, position):
         self.state[cell.position[0]][cell.position[1]] = None
@@ -135,35 +113,40 @@ class GameBoard:
         return self.state
 
     def make_move(self, direction):
-        does_move_change_state = False
-        direction_vector = self.directions[direction]
+        if self.is_game_over():
+            return False
 
-        steps = self.generate_steps(direction_vector)
+        does_move_change_state = False
+        direction = self.directions[direction]
+
+        steps = direction[1]
 
         self.prepare_cells_for_move()
 
         for x in steps[0]:
             for y in steps[1]:
                 cell = self.get_cell_at_position(x, y)
+                cell_index = [x, y]
 
                 if cell:
-                    farthest_open_cell_indices = self.get_closest_neighbour(cell.position, direction_vector)
-                    farthest_open_cell = self.get_cell_at_index(farthest_open_cell_indices[1])
+                    closest_neighbour_indices = self.get_closest_neighbour(cell.position, direction[0])
+                    closest_neighbour = self.get_cell_at_index(closest_neighbour_indices[1])
 
-                    if farthest_open_cell and farthest_open_cell.value == cell.value and not \
-                            farthest_open_cell.merge_parents:
-                        merged_cell = Cell(farthest_open_cell.position, cell.value + 1, [cell, farthest_open_cell])
+                    if closest_neighbour and closest_neighbour.value == cell.value and not \
+                            closest_neighbour.merged:
+                        merged_cell = Cell(closest_neighbour_indices[1], cell.value + 1, True)
 
                         self.add_cell_to_grid(merged_cell)
                         self.remove_cell_from_grid(cell)
 
-                        cell.change_position(farthest_open_cell_indices[1])
+                        cell.change_position(closest_neighbour_indices[1])
 
                         does_move_change_state = True
                     # Move
-                    elif cell.position != farthest_open_cell_indices[0]:
-                        self.move_cell(cell, farthest_open_cell_indices[0])
+                    else:
+                        self.move_cell(cell, closest_neighbour_indices[0])
 
+                    if cell.position != cell_index:
                         does_move_change_state = True
 
         return does_move_change_state
@@ -177,7 +160,7 @@ class GameBoard:
 
                 if value:
                     for step in ['right', 'down']:
-                        closest_cell_index = self.get_closest_neighbour([x, y], self.directions[step])[1]
+                        closest_cell_index = self.get_closest_neighbour([x, y], self.directions[step][0])[1]
 
                         if self.is_index_occupied(closest_cell_index):
                             smoothness -= abs(value-self.get_value_at_index(closest_cell_index))
@@ -235,11 +218,11 @@ class GameBoard:
 
 
 class Cell:
-    def __init__(self, position, value, merge_parents=None):
+    def __init__(self, position, value, merged=False):
         self.position = position
         self.value = value
 
-        self.merge_parents = merge_parents
+        self.merged = merged
         self.previous_position = None
 
     def change_position(self, position):
