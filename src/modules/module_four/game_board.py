@@ -8,21 +8,20 @@ from copy import deepcopy
 
 EVAL_WEIGHTS = {
     'empty': 2.7,
-    'max': 2.0,
+    'max': 1.0,
     'smooth': 0.1,
-    'mono': 1.0
+    'mono': 1.0,
+    'tidy': 0.0
 }
 
-EVAL_WEIGHTS2 = [
-    [10.0, 8.0, 7.0, 6.5],
-    [0.5, 0.7, 1.0, 3.0],
-    [-0.5, -1.5, -1.8, -2.0],
-    [-3.8, -3.7, -3.5, -3.0]
+TIDY_WEIGHTS = [
+    map(exp, _) for _ in [
+        [10.0, 8.0, 7.0, 6.5],
+        [0.5, 0.7, 1.0, 3.0],
+        [-0.5, -1.5, -1.8, -2.0],
+        [-3.8, -3.7, -3.5, -3.0]
+    ]
 ]
-
-for x in [0, 1, 2, 3]:
-    for y in [0, 1, 2, 3]:
-        EVAL_WEIGHTS2[x][y] = exp(EVAL_WEIGHTS2[x][y])
 
 
 class GameBoard:
@@ -194,9 +193,10 @@ class GameBoard:
                 if value:
                     for step in ['right', 'down']:
                         closest_cell_index = self.get_closest_neighbour([x, y], self.directions[step][0])[1]
+                        closest_cell_value = self.get_value_at_index(closest_cell_index)
 
-                        if self.is_index_occupied(closest_cell_index):
-                            smoothness -= abs(value-self.get_value_at_index(closest_cell_index))
+                        if closest_cell_value:
+                            smoothness -= abs(value-closest_cell_value)
 
         return smoothness
 
@@ -210,6 +210,9 @@ class GameBoard:
             while next_index <= 3:
                 while next_index <= 3 and not self.is_index_occupied([x, next_index]):
                     next_index += 1
+
+                if next_index >= 4:
+                    next_index -= 1
 
                 current_value = self.get_value_at_position(x, current_index)
                 next_value = self.get_value_at_position(x, next_index)
@@ -230,13 +233,16 @@ class GameBoard:
                 while next_index <= 3 and not self.is_index_occupied([next_index, y]):
                     next_index += 1
 
+                if next_index >= 4:
+                    next_index -= 1
+
                 current_value = self.get_value_at_position(current_index, y)
                 next_value = self.get_value_at_position(next_index, y)
 
                 if current_value > next_value:
-                    direction_scores[1] += next_value - current_value
+                    direction_scores[2] += next_value - current_value
                 elif next_index > current_value:
-                    direction_scores[2] += current_value - next_value
+                    direction_scores[3] += current_value - next_value
 
                 current_index = next_index
                 next_index += 1
@@ -247,17 +253,25 @@ class GameBoard:
         return max(max([self.get_value_at_position(x, y) for y in [0, 1, 2, 3]]) for x in [0, 1, 2, 3])
 
     def evaluate(self):
-        return \
-            log(self.get_number_of_empty_cells() * EVAL_WEIGHTS['empty']) +\
-            self.get_max_value() * EVAL_WEIGHTS['max'] +\
-            self.smoothness() * EVAL_WEIGHTS['smooth'] +\
-            self.monotonicity() * EVAL_WEIGHTS['mono']
+        number_of_empty_cells = self.get_number_of_empty_cells()
+        number_of_empty_cells_log = log(number_of_empty_cells) if number_of_empty_cells else 0.0
 
-    """def evaluate(self):
-        dot_product = sum(sum(dot(self.get_cell_values(), EVAL_WEIGHTS2)))
-        free_cells_weight = self.get_number_of_empty_cells() ** 2
+        weights = [
+            number_of_empty_cells_log * EVAL_WEIGHTS['empty'],
+            (2 ** self.get_max_value()) * EVAL_WEIGHTS['max'],
+            self.smoothness() * EVAL_WEIGHTS['smooth'],
+            self.monotonicity() * EVAL_WEIGHTS['mono'],
+            self.tidy() * EVAL_WEIGHTS['tidy']
+        ]
 
-        return dot([1, 1], [dot_product, free_cells_weight])"""
+        print weights
+
+        return sum(weights)
+
+    def tidy(self):
+        dot_product = sum(sum(dot(self.get_cell_values(), TIDY_WEIGHTS)))
+
+        return dot_product
 
     def clone(self):
         return GameBoard(deepcopy(self.state))

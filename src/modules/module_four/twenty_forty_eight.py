@@ -1,5 +1,3 @@
-import time
-
 from modules.module_four.game_board import GameBoard, Cell
 
 
@@ -13,7 +11,7 @@ class TwentyFortyEight:
         number_of_empty_cells = self.game_board.get_number_of_empty_cells()
         depth = 1 if number_of_empty_cells > 7 else 2 if number_of_empty_cells > 4 else 3
 
-        search = self.search(depth, -10000, 10000, 0, 0, True)
+        search = self.search(depth, -10000, 10000, True)
 
         return search['direction']
 
@@ -25,7 +23,7 @@ class TwentyFortyEight:
         self.game_board.make_computer_move()
         self.ui.update_ui(self.game_board.state)
 
-    def evaluate_player_move(self, depth, alpha, beta, positions, cut_offs):
+    def evaluate_player_move(self, depth, alpha, beta):
         best_move = -1
         best_score = alpha
 
@@ -33,14 +31,10 @@ class TwentyFortyEight:
             game_board = self.game_board.clone()
 
             if game_board.make_player_move(direction):
-                positions += 1
-
                 if game_board.has_2048():
                     return {
                         'direction': direction,
-                        'score': 10000,
-                        'positions': positions,
-                        'cut_offs': cut_offs
+                        'score': 10000
                     }
 
                 twenty_forty_eight = TwentyFortyEight(game_board=game_board)
@@ -51,42 +45,29 @@ class TwentyFortyEight:
                         'score': twenty_forty_eight.game_board.evaluate()
                     }
                 else:
-                    result = twenty_forty_eight.search(depth-1, best_score, beta, positions, cut_offs, False)
+                    result = twenty_forty_eight.search(depth-1, best_score, beta, False)
 
                     if result['score'] > 9900:
                         result['score'] -= 1
-
-                    positions = result['positions']
-                    cut_offs = result['cut_offs']
 
                 if result['score'] > best_score:
                     best_score = result['score']
                     best_move = direction
 
                 if best_score > beta:
-                    cut_offs += 1
-
                     return {
                         'direction': best_move,
-                        'score': beta,
-                        'positions': positions,
-                        'cut_offs': cut_offs
+                        'score': beta
                     }
 
-        result = {
+        return {
             'direction': best_move,
-            'score': best_score,
-            'positions': positions,
-            'cut_offs': cut_offs
+            'score': best_score
         }
 
-        return result
-
-    def evaluate_computer_move(self, depth, alpha, beta, positions, cut_offs):
+    def evaluate_computer_move(self, depth, alpha, beta):
         best_move = -1
         best_score = beta
-
-        candidate_cells = []
 
         empty_cells = self.game_board.get_empty_cells()
         number_of_empty_cells = len(empty_cells)
@@ -102,11 +83,13 @@ class TwentyFortyEight:
 
                 self.game_board.add_cell_to_grid(new_cell)
 
-                scores[value].append(-self.game_board.smoothness())
+                scores[value].append(self.game_board.evaluate())
 
                 self.game_board.remove_cell_from_grid(new_cell)
 
-        max_score = max(scores[1] + scores[2])
+        max_score = min(scores[1] + scores[2])
+
+        candidate_cells = []
 
         for value in scores:
             for i in range(number_of_empty_cells):
@@ -114,8 +97,6 @@ class TwentyFortyEight:
                     candidate_cells.append([empty_cells[i], value])
 
         for candidate_cell in candidate_cells:
-            positions += 1
-
             cell = Cell(candidate_cell[0], candidate_cell[1])
 
             game_board = self.game_board.clone()
@@ -123,37 +104,28 @@ class TwentyFortyEight:
 
             twenty_forty_eight = TwentyFortyEight(game_board=game_board)
 
-            result = twenty_forty_eight.search(depth, alpha, best_score, positions, cut_offs, True)
-
-            positions = result['positions']
-            cut_offs = result['cut_offs']
+            result = twenty_forty_eight.search(depth, alpha, best_score, True)
 
             if result['score'] < best_score:
                 best_score = result['score']
 
             if best_score < alpha:
-                cut_offs += 1
-
                 return {
                     'direction': None,
-                    'score': alpha,
-                    'positions': positions,
-                    'cut_offs': cut_offs
+                    'score': alpha
                 }
 
         result = {
             'direction': best_move,
-            'score': best_score,
-            'positions': positions,
-            'cut_offs': cut_offs
+            'score': best_score
         }
 
         return result
 
-    def search(self, depth, alpha, beta, positions, cut_offs, is_player_turn):
+    def search(self, depth, alpha, beta, is_player_turn):
         return \
-            self.evaluate_player_move(depth, alpha, beta, positions, cut_offs) if is_player_turn else \
-            self.evaluate_computer_move(depth, alpha, beta, positions, cut_offs)
+            self.evaluate_player_move(depth, alpha, beta) if is_player_turn else \
+            self.evaluate_computer_move(depth, alpha, beta)
 
     def player_choose_move(self):
         move = raw_input('Next move: ')
@@ -180,13 +152,6 @@ class TwentyFortyEight:
         self.make_computer_move()
 
         while not self.game_board.is_game_over():
-            """moved = self.player_choose_move()
-
-            while not moved:
-                print 'Illegal move'
-
-                moved = self.player_choose_move()"""
-
             self.make_player_move()
             self.make_computer_move()
         try:
