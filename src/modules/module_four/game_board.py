@@ -1,13 +1,33 @@
 from numpy.random import choice
-from numpy import add
+from numpy import add, dot
+
+from math import log, exp
 
 from copy import deepcopy
+
+
+EVAL_WEIGHTS = {
+    'empty': 2.7,
+    'max': 2.0,
+    'smooth': 0.1,
+    'mono': 1.0
+}
+
+EVAL_WEIGHTS2 = [
+    [10.0, 8.0, 7.0, 6.5],
+    [0.5, 0.7, 1.0, 3.0],
+    [-0.5, -1.5, -1.8, -2.0],
+    [-3.8, -3.7, -3.5, -3.0]
+]
+
+for x in [0, 1, 2, 3]:
+    for y in [0, 1, 2, 3]:
+        EVAL_WEIGHTS2[x][y] = exp(EVAL_WEIGHTS2[x][y])
 
 
 class GameBoard:
     def __init__(self, state=None):
         self.state = state if state else self.generate_grid()
-        self.make_computer_move()
 
         self.directions = {
             'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
@@ -19,6 +39,19 @@ class GameBoard:
     @staticmethod
     def generate_grid():
         return [[None] * 4 for _ in [0, 1, 2, 3]]
+
+    def get_cell_values(self):
+        values = []
+
+        for x in [0, 1, 2, 3]:
+            column = []
+
+            for y in [0, 1, 2, 3]:
+                column.append(self.get_value_at_position(x, y))
+
+            values.append(column)
+
+        return values
 
     def has_2048(self):
         for x in [0, 1, 2, 3]:
@@ -112,7 +145,7 @@ class GameBoard:
 
         return self.state
 
-    def make_move(self, direction):
+    def make_player_move(self, direction):
         if self.is_game_over():
             return False
 
@@ -212,6 +245,19 @@ class GameBoard:
 
     def get_max_value(self):
         return max(max([self.get_value_at_position(x, y) for y in [0, 1, 2, 3]]) for x in [0, 1, 2, 3])
+
+    def evaluate(self):
+        return \
+            log(self.get_number_of_empty_cells() * EVAL_WEIGHTS['empty']) +\
+            self.get_max_value() * EVAL_WEIGHTS['max'] +\
+            self.smoothness() * EVAL_WEIGHTS['smooth'] +\
+            self.monotonicity() * EVAL_WEIGHTS['mono']
+
+    """def evaluate(self):
+        dot_product = sum(sum(dot(self.get_cell_values(), EVAL_WEIGHTS2)))
+        free_cells_weight = self.get_number_of_empty_cells() ** 2
+
+        return dot([1, 1], [dot_product, free_cells_weight])"""
 
     def clone(self):
         return GameBoard(deepcopy(self.state))

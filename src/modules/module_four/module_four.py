@@ -13,7 +13,7 @@ class ModuleFour:
         self.run()
 
     def run(self):
-        twenty_forty_eight = TwentyFortyEight(2, self.ui)
+        twenty_forty_eight = TwentyFortyEight(ui=self.ui)
 
         twenty_forty_eight.run()
 
