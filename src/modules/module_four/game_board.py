@@ -1,27 +1,10 @@
 from numpy.random import choice
-from numpy import add, dot
+from numpy import add
 
-from math import log, exp
+from math import log
 
 from copy import deepcopy
 
-
-EVAL_WEIGHTS = {
-    'empty': 2.7,
-    'max': 1.5,
-    'smooth': 1.0,
-    'mono': 2.0,
-    'tidy': 0.0
-}
-
-TIDY_WEIGHTS = [
-    map(exp, _) for _ in [
-        [10.0, 8.0, 7.0, 6.5],
-        [0.5, 0.7, 1.0, 3.0],
-        [-0.5, -1.5, -1.8, -2.0],
-        [-3.8, -3.7, -3.5, -3.0]
-    ]
-]
 
 DIRECTIONS = {
     'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
@@ -29,6 +12,21 @@ DIRECTIONS = {
     'down': [[0, 1], [[0, 1, 2, 3], [3, 2, 1, 0]]],
     'left': [[-1, 0], [[0, 1, 2, 3], [0, 1, 2, 3]]]
 }
+
+EVAL_WEIGHTS = {
+    'empty': 1.0,
+    'max': 0.0,
+    'tidy': 1.5
+}
+
+PATH = [
+    [0, 0], [0, 1], [0, 2], [0, 3],
+    [1, 3], [1, 2], [1, 1], [1, 0],
+    [2, 0], [2, 1], [2, 2], [2, 3],
+    [3, 3], [3, 2], [3, 1], [3, 0]
+]
+
+R = 0.30
 
 
 class GameBoard:
@@ -181,72 +179,6 @@ class GameBoard:
 
         return does_move_change_state
 
-    def smoothness(self):
-        smoothness = 0
-
-        for x in [0, 1, 2, 3]:
-            for y in [0, 1, 2, 3]:
-                value = self.get_value_at_position(x, y)
-
-                if value:
-                    for step in ['right', 'down']:
-                        closest_cell_index = self.get_closest_neighbour([x, y], self.directions[step][0])[1]
-                        closest_cell_value = self.get_value_at_index(closest_cell_index)
-
-                        if closest_cell_value:
-                            smoothness -= abs(value-closest_cell_value)
-
-        return smoothness
-
-    def monotonicity(self):
-        direction_scores = [0, 0, 0, 0]
-
-        for x in [0, 1, 2, 3]:
-            current_index = 0
-            next_index = current_index+1
-
-            while next_index <= 3:
-                while next_index <= 3 and not self.is_index_occupied([x, next_index]):
-                    next_index += 1
-
-                if next_index >= 4:
-                    next_index -= 1
-
-                current_value = self.get_value_at_position(x, current_index)
-                next_value = self.get_value_at_position(x, next_index)
-
-                if current_value > next_value:
-                    direction_scores[0] += next_value - current_value
-                elif next_index > current_value:
-                    direction_scores[1] += current_value - next_value
-
-                current_index = next_index
-                next_index += 1
-
-        for y in [0, 1, 2, 3]:
-            current_index = 0
-            next_index = current_index+1
-
-            while next_index <= 3:
-                while next_index <= 3 and not self.is_index_occupied([next_index, y]):
-                    next_index += 1
-
-                if next_index >= 4:
-                    next_index -= 1
-
-                current_value = self.get_value_at_position(current_index, y)
-                next_value = self.get_value_at_position(next_index, y)
-
-                if current_value > next_value:
-                    direction_scores[2] += next_value - current_value
-                elif next_index > current_value:
-                    direction_scores[3] += current_value - next_value
-
-                current_index = next_index
-                next_index += 1
-
-        return max(direction_scores[:2]) + max(direction_scores[2:])
-
     def get_max_value(self):
         return max(max([self.get_value_at_position(x, y) for y in [0, 1, 2, 3]]) for x in [0, 1, 2, 3])
 
@@ -257,17 +189,18 @@ class GameBoard:
         weights = [
             number_of_empty_cells_log * EVAL_WEIGHTS['empty'],
             (2 ** self.get_max_value()) * EVAL_WEIGHTS['max'],
-            self.smoothness() * EVAL_WEIGHTS['smooth'],
-            self.monotonicity() * EVAL_WEIGHTS['mono'],
             self.tidy() * EVAL_WEIGHTS['tidy']
         ]
 
         return sum(weights)
 
     def tidy(self):
-        dot_product = sum(sum(dot(self.get_cell_values(), TIDY_WEIGHTS)))
+        score = 0
 
-        return dot_product
+        for n in range(16):
+            score += self.get_value_at_index(PATH[n]) * (R ** n)
+
+        return score
 
     def clone(self):
         return GameBoard(deepcopy(self.state))

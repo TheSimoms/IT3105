@@ -17,14 +17,12 @@ class TwentyFortyEight:
     def get_depth(self):
         number_of_empty_cells = self.game_board.get_number_of_empty_cells()
 
-        if number_of_empty_cells > 10:
+        if number_of_empty_cells > 3:
             return 1
-        elif number_of_empty_cells > 3:
-            return 1
-        elif number_of_empty_cells > 2:
+        elif number_of_empty_cells > 1:
             return 2
         else:
-            return 2
+            return 3
 
     def get_next_player_move(self):
         return self.search(self.get_depth(), True)['direction']
@@ -34,16 +32,12 @@ class TwentyFortyEight:
         moved = False
 
         if next_move is None:
-            print "NO MOVE FOUND"
-
             for direction in self.game_board.directions:
                 if self.game_board.make_player_move(direction):
                     moved = True
 
                     break
         else:
-            print "MOVE FOUND"
-
             moved = True
 
             self.game_board.make_player_move(next_move)
@@ -119,12 +113,11 @@ class TwentyFortyEight:
             self.evaluate_computer_move(depth)
 
     def run(self):
-        computer_move = self.make_computer_move()
-        player_move = self.make_player_move()
+        computer_move = True
+        player_move = True
 
         while computer_move and player_move:
             computer_move = self.make_computer_move()
             player_move = self.make_player_move()
 
-        print "Score: %d" % 2 ** self.game_board.get_max_value()
-        print
+        return 2 ** self.game_board.get_max_value()
