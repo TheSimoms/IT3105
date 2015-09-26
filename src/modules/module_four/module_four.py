@@ -7,15 +7,13 @@ from modules.module_four.ui import Ui
 class ModuleFour:
     def __init__(self, sleep_duration=0.0, height=800):
         self.sleep_duration = sleep_duration
-
         self.ui = Ui(height)
 
         self.run()
 
     def run(self):
-        twenty_forty_eight = TwentyFortyEight(ui=self.ui)
-
-        twenty_forty_eight.run()
+        while True:
+            TwentyFortyEight(ui=self.ui).run()
 
 
 if __name__ == '__main__':

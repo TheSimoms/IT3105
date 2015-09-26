@@ -23,17 +23,18 @@ TIDY_WEIGHTS = [
     ]
 ]
 
+DIRECTIONS = {
+    'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
+    'right': [[1, 0], [[3, 2, 1, 0], [0, 1, 2, 3]]],
+    'down': [[0, 1], [[0, 1, 2, 3], [3, 2, 1, 0]]],
+    'left': [[-1, 0], [[0, 1, 2, 3], [0, 1, 2, 3]]]
+}
+
 
 class GameBoard:
     def __init__(self, state=None):
         self.state = state if state else self.generate_grid()
-
-        self.directions = {
-            'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
-            'right': [[1, 0], [[3, 2, 1, 0], [0, 1, 2, 3]]],
-            'down': [[0, 1], [[0, 1, 2, 3], [3, 2, 1, 0]]],
-            'left': [[-1, 0], [[0, 1, 2, 3], [0, 1, 2, 3]]]
-        }
+        self.directions = DIRECTIONS
 
     @staticmethod
     def generate_grid():
