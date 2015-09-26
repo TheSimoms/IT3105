@@ -60,9 +60,6 @@ class GameBoard:
 
         return False
 
-    def is_game_over(self):
-        return self.get_number_of_empty_cells() == 0
-
     def get_empty_cells(self):
         return [[x, y] for y in [0, 1, 2, 3] for x in [0, 1, 2, 3] if not self.get_value_at_position(x, y)]
 
@@ -138,16 +135,16 @@ class GameBoard:
 
     def make_computer_move(self):
         empty_cells = self.get_empty_cells()
-        next_cell_index = choice(range(len(empty_cells)))
+        next_cell_index = choice(range(len(empty_cells))) if empty_cells else None
 
-        self.add_cell_to_grid(Cell(empty_cells[next_cell_index], self.get_next_spawning()))
+        if next_cell_index is not None:
+            self.add_cell_to_grid(Cell(empty_cells[next_cell_index], self.get_next_spawning()))
 
-        return self.state
+            return True
+
+        return False
 
     def make_player_move(self, direction):
-        if self.is_game_over():
-            return False
-
         does_move_change_state = False
         direction = self.directions[direction]
 
@@ -263,8 +260,6 @@ class GameBoard:
             self.monotonicity() * EVAL_WEIGHTS['mono'],
             self.tidy() * EVAL_WEIGHTS['tidy']
         ]
-
-        print weights
 
         return sum(weights)
 

@@ -7,21 +7,46 @@ class TwentyFortyEight:
 
         self.game_board = GameBoard() if not game_board else game_board
 
-    def get_next_player_move(self):
+    def get_depth(self):
         number_of_empty_cells = self.game_board.get_number_of_empty_cells()
-        depth = 1 if number_of_empty_cells > 7 else 2 if number_of_empty_cells > 4 else 3
 
-        search = self.search(depth, -10000, 10000, True)
+        if number_of_empty_cells > 7:
+            return 3
+        elif number_of_empty_cells > 4:
+            return 4
+        elif number_of_empty_cells > 2:
+            return 5
+        else:
+            return 5
 
-        return search['direction']
+    def get_next_player_move(self):
+        return self.search(self.get_depth(), -10000, 10000, True)['direction']
 
     def make_player_move(self):
-        self.game_board.make_player_move(self.get_next_player_move())
+        next_move = self.get_next_player_move()
+        moved = False
+
+        if next_move == -1:
+            for direction in self.game_board.directions:
+                if self.game_board.make_player_move(direction):
+                    moved = True
+
+                    break
+        else:
+            moved = True
+
+            self.game_board.make_player_move(next_move)
+
         self.ui.update_ui(self.game_board.state)
 
+        return moved
+
     def make_computer_move(self):
-        self.game_board.make_computer_move()
+        moved = self.game_board.make_computer_move()
+
         self.ui.update_ui(self.game_board.state)
+
+        return moved
 
     def evaluate_player_move(self, depth, alpha, beta):
         best_move = -1
@@ -83,17 +108,17 @@ class TwentyFortyEight:
 
                 self.game_board.add_cell_to_grid(new_cell)
 
-                scores[value].append(self.game_board.evaluate())
+                scores[value].append(self.game_board.smoothness())
 
                 self.game_board.remove_cell_from_grid(new_cell)
 
-        max_score = min(scores[1] + scores[2])
+        min_score = min(scores[1] + scores[2])
 
         candidate_cells = []
 
         for value in scores:
             for i in range(number_of_empty_cells):
-                if scores[value][i] == max_score:
+                if scores[value][i] == min_score:
                     candidate_cells.append([empty_cells[i], value])
 
         for candidate_cell in candidate_cells:
@@ -149,11 +174,13 @@ class TwentyFortyEight:
         return moved
 
     def run(self):
-        self.make_computer_move()
+        computer_move = self.make_computer_move()
+        player_move = self.make_player_move()
 
-        while not self.game_board.is_game_over():
-            self.make_player_move()
-            self.make_computer_move()
+        while computer_move and player_move:
+            computer_move = self.make_computer_move()
+            player_move = self.make_player_move()
+
         try:
             input('Done. Press return to continue')
         except:
