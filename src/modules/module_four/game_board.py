@@ -14,7 +14,7 @@ DIRECTIONS = {
 }
 
 EVAL_WEIGHTS = {
-    'empty': 1.0,
+    'empty': 0.5,
     'max': 0.0,
     'tidy': 1.5
 }

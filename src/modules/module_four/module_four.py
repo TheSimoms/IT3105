@@ -8,20 +8,7 @@ class ModuleFour:
         self.run()
 
     def run(self):
-        scores = []
-
-        while True:
-            try:
-                score = TwentyFortyEight(ui=self.ui).run()
-
-                print "Score: %d" % score
-
-                scores.append(score)
-            except KeyboardInterrupt:
-                break
-
-        print 'Results:'
-        print scores
+        TwentyFortyEight(ui=self.ui).run()
 
         try:
             input('Done. Press return to continue')

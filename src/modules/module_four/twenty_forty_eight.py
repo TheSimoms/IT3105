@@ -63,12 +63,6 @@ class TwentyFortyEight:
             game_board = self.game_board.clone()
 
             if game_board.make_player_move(direction):
-                if game_board.has_2048():
-                    return {
-                        'direction': direction,
-                        'score': 1000000
-                    }
-
                 if depth == 0:
                     result = {
                         'direction': direction,
