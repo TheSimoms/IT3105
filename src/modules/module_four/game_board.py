@@ -8,9 +8,9 @@ from copy import deepcopy
 
 EVAL_WEIGHTS = {
     'empty': 2.7,
-    'max': 1.0,
-    'smooth': 0.1,
-    'mono': 1.0,
+    'max': 1.5,
+    'smooth': 1.0,
+    'mono': 2.0,
     'tidy': 0.0
 }
 

@@ -29,7 +29,7 @@ class Ui:
         ]
 
         self.cell_size = height / 4
-        self.font_size = self.cell_size / 2
+        self.font_size = self.cell_size / 3
 
         self.window_size = [height, self.cell_size * 4]
 
@@ -61,7 +61,11 @@ class Ui:
     def draw_text(self, x, y, value):
         self.screen.blit(
             self.font.render(value, 1, (0, 0, 0)),
-            (self.cell_size * (0.5 + x) - 0.20*self.font_size, self.cell_size * (0.5 + y) - 0.20*self.font_size))
+            (
+                self.cell_size * (0.5 + x) - 0.15*self.font_size*len(value),
+                self.cell_size * (0.5 + y) - 0.20*self.font_size
+            )
+        )
 
     def update_ui(self, state):
         self.screen.fill(self.background)
