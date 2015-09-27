@@ -16,7 +16,7 @@ DIRECTIONS = {
 EVAL_WEIGHTS = {
     'empty': 0.5,
     'max': 0.0,
-    'tidy': 1.5
+    'tidy': 2
 }
 
 PATH = [
@@ -26,7 +26,7 @@ PATH = [
     [3, 3], [3, 2], [3, 1], [3, 0]
 ]
 
-R = 0.30
+R = 0.25
 
 
 class GameBoard:
@@ -198,7 +198,7 @@ class GameBoard:
         score = 0
 
         for n in range(16):
-            score += self.get_value_at_index(PATH[n]) * (R ** n)
+            score += (self.get_value_at_index(PATH[n]) ** 2) * (R ** n)
 
         return score
 
