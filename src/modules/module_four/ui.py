@@ -9,27 +9,27 @@ class Ui:
         self.background = (255, 255, 255)
 
         self.cell_colors = [
-            (255, 255, 255),
-            (244, 194, 194),
-            (255, 194, 194),
-            (255, 28, 0),
-            (205, 92, 92),
-            (227, 66, 52),
-            (215, 59, 62),
-            (206, 22, 32),
+            (255, 153, 153),
+            (255, 127, 127),
+            (255, 102, 102),
+            (255, 76, 76),
+            (255, 50, 50),
+            (255, 25, 25),
+            (255, 0, 0),
+            (229, 0, 0),
             (204, 0, 0),
-            (178, 34, 34),
-            (164, 0, 0),
-            (128, 0, 0),
-            (112, 28, 28),
-            (60, 20, 20),
-            (50, 20, 20),
-            (25, 10, 10),
-            (0, 0, 0),
+            (178, 0, 0),
+            (153, 0, 0),
+            (127, 0, 0),
+            (102, 0, 0),
+            (76, 0, 0),
+            (51, 0, 0),
+            (25, 0, 0),
+            (0, 0, 0)
         ]
 
         self.cell_size = height / 4
-        self.font_size = self.cell_size / 2
+        self.font_size = self.cell_size / 3
 
         self.window_size = [height, self.cell_size * 4]
 
@@ -61,7 +61,11 @@ class Ui:
     def draw_text(self, x, y, value):
         self.screen.blit(
             self.font.render(value, 1, (0, 0, 0)),
-            (self.cell_size * (0.5 + x) - 0.20*self.font_size, self.cell_size * (0.5 + y) - 0.20*self.font_size))
+            (
+                self.cell_size * (0.5 + x) - 0.15*self.font_size*len(value),
+                self.cell_size * (0.5 + y) - 0.20*self.font_size
+            )
+        )
 
     def update_ui(self, state):
         self.screen.fill(self.background)

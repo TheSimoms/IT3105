@@ -1,24 +1,55 @@
 from numpy.random import choice
 from numpy import add
 
+from math import log
+
 from copy import deepcopy
+
+
+DIRECTIONS = {
+    'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
+    'right': [[1, 0], [[3, 2, 1, 0], [0, 1, 2, 3]]],
+    'down': [[0, 1], [[0, 1, 2, 3], [3, 2, 1, 0]]],
+    'left': [[-1, 0], [[0, 1, 2, 3], [0, 1, 2, 3]]]
+}
+
+EVAL_WEIGHTS = {
+    'empty': 0.5,
+    'max': 0.0,
+    'tidy': 2
+}
+
+PATH = [
+    [0, 0], [0, 1], [0, 2], [0, 3],
+    [1, 3], [1, 2], [1, 1], [1, 0],
+    [2, 0], [2, 1], [2, 2], [2, 3],
+    [3, 3], [3, 2], [3, 1], [3, 0]
+]
+
+R = 0.25
 
 
 class GameBoard:
     def __init__(self, state=None):
         self.state = state if state else self.generate_grid()
-        self.make_computer_move()
-
-        self.directions = {
-            'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
-            'right': [[1, 0], [[3, 2, 1, 0], [0, 1, 2, 3]]],
-            'down': [[0, 1], [[0, 1, 2, 3], [3, 2, 1, 0]]],
-            'left': [[-1, 0], [[0, 1, 2, 3], [0, 1, 2, 3]]]
-        }
+        self.directions = DIRECTIONS
 
     @staticmethod
     def generate_grid():
         return [[None] * 4 for _ in [0, 1, 2, 3]]
+
+    def get_cell_values(self):
+        values = []
+
+        for x in [0, 1, 2, 3]:
+            column = []
+
+            for y in [0, 1, 2, 3]:
+                column.append(self.get_value_at_position(x, y))
+
+            values.append(column)
+
+        return values
 
     def has_2048(self):
         for x in [0, 1, 2, 3]:
@@ -27,9 +58,6 @@ class GameBoard:
                     return True
 
         return False
-
-    def is_game_over(self):
-        return self.get_number_of_empty_cells() == 0
 
     def get_empty_cells(self):
         return [[x, y] for y in [0, 1, 2, 3] for x in [0, 1, 2, 3] if not self.get_value_at_position(x, y)]
@@ -106,16 +134,16 @@ class GameBoard:
 
     def make_computer_move(self):
         empty_cells = self.get_empty_cells()
-        next_cell_index = choice(range(len(empty_cells)))
+        next_cell_index = choice(range(len(empty_cells))) if empty_cells else None
 
-        self.add_cell_to_grid(Cell(empty_cells[next_cell_index], self.get_next_spawning()))
+        if next_cell_index is not None:
+            self.add_cell_to_grid(Cell(empty_cells[next_cell_index], self.get_next_spawning()))
 
-        return self.state
+            return True
 
-    def make_move(self, direction):
-        if self.is_game_over():
-            return False
+        return False
 
+    def make_player_move(self, direction):
         does_move_change_state = False
         direction = self.directions[direction]
 
@@ -151,67 +179,28 @@ class GameBoard:
 
         return does_move_change_state
 
-    def smoothness(self):
-        smoothness = 0
-
-        for x in [0, 1, 2, 3]:
-            for y in [0, 1, 2, 3]:
-                value = self.get_value_at_position(x, y)
-
-                if value:
-                    for step in ['right', 'down']:
-                        closest_cell_index = self.get_closest_neighbour([x, y], self.directions[step][0])[1]
-
-                        if self.is_index_occupied(closest_cell_index):
-                            smoothness -= abs(value-self.get_value_at_index(closest_cell_index))
-
-        return smoothness
-
-    def monotonicity(self):
-        direction_scores = [0, 0, 0, 0]
-
-        for x in [0, 1, 2, 3]:
-            current_index = 0
-            next_index = current_index+1
-
-            while next_index <= 3:
-                while next_index <= 3 and not self.is_index_occupied([x, next_index]):
-                    next_index += 1
-
-                current_value = self.get_value_at_position(x, current_index)
-                next_value = self.get_value_at_position(x, next_index)
-
-                if current_value > next_value:
-                    direction_scores[0] += next_value - current_value
-                elif next_index > current_value:
-                    direction_scores[1] += current_value - next_value
-
-                current_index = next_index
-                next_index += 1
-
-        for y in [0, 1, 2, 3]:
-            current_index = 0
-            next_index = current_index+1
-
-            while next_index <= 3:
-                while next_index <= 3 and not self.is_index_occupied([next_index, y]):
-                    next_index += 1
-
-                current_value = self.get_value_at_position(current_index, y)
-                next_value = self.get_value_at_position(next_index, y)
-
-                if current_value > next_value:
-                    direction_scores[1] += next_value - current_value
-                elif next_index > current_value:
-                    direction_scores[2] += current_value - next_value
-
-                current_index = next_index
-                next_index += 1
-
-        return max(direction_scores[:2]) + max(direction_scores[2:])
-
     def get_max_value(self):
         return max(max([self.get_value_at_position(x, y) for y in [0, 1, 2, 3]]) for x in [0, 1, 2, 3])
+
+    def evaluate(self):
+        number_of_empty_cells = self.get_number_of_empty_cells()
+        number_of_empty_cells_log = log(number_of_empty_cells) if number_of_empty_cells else 0.0
+
+        weights = [
+            number_of_empty_cells_log * EVAL_WEIGHTS['empty'],
+            (2 ** self.get_max_value()) * EVAL_WEIGHTS['max'],
+            self.tidy() * EVAL_WEIGHTS['tidy']
+        ]
+
+        return sum(weights)
+
+    def tidy(self):
+        score = 0
+
+        for n in range(16):
+            score += (self.get_value_at_index(PATH[n]) ** 2) * (R ** n)
+
+        return score
 
     def clone(self):
         return GameBoard(deepcopy(self.state))

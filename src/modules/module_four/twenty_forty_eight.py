@@ -1,186 +1,117 @@
-import time
-
-from math import log
+from numpy import mean
 
 from modules.module_four.game_board import GameBoard, Cell
 
 
-EVAL_WEIGHTS = {
-    'empty': 2.7,
-    'max': 1.0,
-    'smooth': 0.1,
-    'mono': 1.0
+PROBABILITIES = {
+    1: 0.9,
+    2: 0.1
 }
 
 
 class TwentyFortyEight:
-    def __init__(self, depth, ui):
-        self.depth = depth
+    def __init__(self, game_board=None, ui=None):
         self.ui = ui
+        self.game_board = GameBoard() if not game_board else game_board
 
-        self.game_board = GameBoard()
-
-    def get_next_player_move(self):
-        search = self.search(self.depth, -10000, 10000, 0, 0, True)
-
-        print search
-
-        return search['direction']
-
-    def make_player_move(self):
-        self.game_board.make_move(self.get_next_player_move())
-
-    def evaluate_state(self):
+    def get_depth(self):
         number_of_empty_cells = self.game_board.get_number_of_empty_cells()
 
-        return \
-            log(number_of_empty_cells * EVAL_WEIGHTS['empty']) +\
-            self.game_board.get_max_value() * EVAL_WEIGHTS['max'] +\
-            self.game_board.smoothness() * EVAL_WEIGHTS['smooth'] +\
-            self.game_board.monotonicity() * EVAL_WEIGHTS['mono']
+        if number_of_empty_cells > 3:
+            return 1
+        elif number_of_empty_cells > 1:
+            return 2
+        else:
+            return 3
 
-    def evaluate_player_move(self, depth, alpha, beta, positions, cut_offs):
-        best_move = -1
-        best_score = alpha
+    def get_next_player_move(self):
+        return self.search(self.get_depth(), True)['direction']
+
+    def make_player_move(self):
+        next_move = self.get_next_player_move()
+        moved = False
+
+        if next_move is None:
+            for direction in self.game_board.directions:
+                if self.game_board.make_player_move(direction):
+                    moved = True
+
+                    break
+        else:
+            moved = True
+
+            self.game_board.make_player_move(next_move)
+
+        if moved and self.ui:
+            self.ui.update_ui(self.game_board.state)
+
+        return moved
+
+    def make_computer_move(self):
+        moved = self.game_board.make_computer_move()
+
+        if moved and self.ui:
+            self.ui.update_ui(self.game_board.state)
+
+        return moved
+
+    def evaluate_player_move(self, depth):
+        best_move = None
+        best_score = -1
 
         for direction in self.game_board.directions:
             game_board = self.game_board.clone()
 
-            if game_board.make_move(direction):
-                positions += 1
-
-                if game_board.has_2048():
-                    return {
-                        'direction': direction,
-                        'score': 10000,
-                        'positions': positions,
-                        'cut_offs': cut_offs
-                    }
-
-                twenty_forty_eight = TwentyFortyEight(game_board, None)
-
+            if game_board.make_player_move(direction):
                 if depth == 0:
                     result = {
                         'direction': direction,
-                        'score': twenty_forty_eight.evaluate_state()
+                        'score': game_board.evaluate()
                     }
                 else:
-                    result = twenty_forty_eight.search(depth-1, best_score, beta, positions, cut_offs, False)
-
-                    if result['score'] > 9900:
-                        result['score'] -= 1
-
-                    positions = result['positions']
-                    cut_offs = result['cut_offs']
+                    result = TwentyFortyEight(game_board=game_board).search(depth-1, False)
 
                 if result['score'] > best_score:
                     best_score = result['score']
                     best_move = direction
 
-                if best_score > beta:
-                    cut_offs -= 1
-
-                    return {
-                        'direction': direction,
-                        'score': beta,
-                        'positions': positions,
-                        'cut_offs': cut_offs
-                    }
-
         return {
             'direction': best_move,
-            'score': best_score,
-            'positions': positions,
-            'cut_offs': cut_offs
+            'score': best_score
         }
 
-    def evaluate_computer_move(self, depth, alpha, beta, positions, cut_offs):
-        best_move = -1
-        best_score = beta
-
-        candidate_cells = []
-
+    def evaluate_computer_move(self, depth):
         empty_cells = self.game_board.get_empty_cells()
-        number_of_empty_cells = len(empty_cells)
 
-        scores = {
-            1: [],
-            2: []
-        }
+        scores = []
 
-        for value in scores:
-            value_scores = scores[value]
+        for empty_cell in empty_cells:
+            for value in [1, 2]:
+                cell = Cell(empty_cell, value)
 
-            for empty_cell in empty_cells:
-                new_cell = Cell(empty_cell, value)
+                game_board = self.game_board.clone()
+                game_board.add_cell_to_grid(cell)
 
-                self.game_board.add_cell_to_grid(new_cell)
+                result = TwentyFortyEight(game_board=game_board).search(depth, True)
 
-                value_scores.append(self.evaluate_state())
-
-                self.game_board.remove_cell_from_grid(new_cell)
-
-        min_score = min(scores[1] + scores[2])
-
-        for value in scores:
-            value_scores = scores[value]
-
-            for i in range(number_of_empty_cells):
-                if value_scores[i] == min_score:
-                    candidate_cells.append([empty_cells[i], value])
-
-        for candidate_cell in candidate_cells:
-            cell = Cell(candidate_cell[0], candidate_cell[1])
-            game_board = self.game_board.clone()
-
-            positions += 1
-
-            game_board.add_cell_to_grid(cell)
-            twenty_forty_eight = TwentyFortyEight(game_board, None)
-
-            result = twenty_forty_eight.search(depth, alpha, best_score, positions, cut_offs, True)
-
-            positions = result['positions']
-            cut_offs = result['cut_offs']
-
-            if result['score'] < best_score:
-                best_score = result['score']
-
-            if best_score < alpha:
-                cut_offs += 1
-
-                return {
-                    'direction': None,
-                    'score': alpha,
-                    'positions': positions,
-                    'cut_offs': cut_offs
-                }
+                scores.append(result['score'] * PROBABILITIES[value])
 
         return {
-            'direction': best_move,
-            'score': best_score,
-            'positions': positions,
-            'cut_offs': cut_offs
+            'direction': None,
+            'score': mean(scores)
         }
 
-    def search(self, depth, alpha, beta, positions, cut_offs, is_player_turn):
+    def search(self, depth, is_player_turn):
         return \
-            self.evaluate_player_move(depth, alpha, beta, positions, cut_offs) if is_player_turn else \
-            self.evaluate_computer_move(depth, alpha, beta, positions, cut_offs)
+            self.evaluate_player_move(depth) if is_player_turn else \
+            self.evaluate_computer_move(depth)
 
     def run(self):
-        while not self.game_board.is_game_over():
-            self.make_player_move()
-            self.ui.update_ui(self.game_board.state)
+        computer_move = True
+        player_move = True
 
-            time.sleep(1)
+        while computer_move and player_move:
+            computer_move = self.make_computer_move()
+            player_move = self.make_player_move()
 
-            self.game_board.make_computer_move()
-            self.ui.update_ui(self.game_board.state)
-
-            time.sleep(1)
-
-        try:
-            input('Done. Press return to continue')
-        except:
-            pass
+        return 2 ** self.game_board.get_max_value()
