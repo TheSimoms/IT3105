@@ -99,10 +99,7 @@ class ModuleTwo:
     def run(self):
         ui = Ui(self.vertices, self.edges, self.width, self.height)
 
-        csp = CSP(self.variables, self.constraints)
-        a_star = AStar(Node(None, csp), ui.update_ui, self.sleep_duration)
-
-        CSPAStar(csp, a_star).run()
+        CSPAStar(self.variables, self.constraints, AStar, Node, ui.update_ui, self.sleep_duration).run()
 
 
 if __name__ == '__main__':

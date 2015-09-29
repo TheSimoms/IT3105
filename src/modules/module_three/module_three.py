@@ -108,10 +108,7 @@ class ModuleThree:
     def run(self):
         ui = Ui(self.dimensions, self.height)
 
-        csp = CSP(self.variables, self.constraints)
-        a_star = AStar(Node(None, csp), ui.update_ui, self.sleep_duration)
-
-        CSPAStar(csp, a_star).run()
+        CSPAStar(self.variables, self.constraints, AStar, Node, ui.update_ui, self.sleep_duration).run()
 
 
 class ElementPermutation(object):
