@@ -7,7 +7,7 @@ from modules.module_one.node import Node
 class ModuleOne:
     def __init__(self, task_file, sleep_duration=0.0):
         self.task_space, self.grid_size, self.start_state, self.end_state = self.generate_task(task_file)
-        
+
         self.start = Node(None, self.start_state, self.end_state)
         self.end = Node(None, self.end_state, self.end_state)
 
@@ -17,13 +17,16 @@ class ModuleOne:
 
     @staticmethod
     def input_to_list(input_value):
-        return [int(value) for value in input_value.strip()[1:-1].split(',')]
+        return [int(value) for value in input_value.strip().split(' ')]
 
     def generate_task(self, input_file_name):
         with open(input_file_name) as input_file:
             grid_size = self.input_to_list(input_file.readline())
-            start = self.input_to_list(input_file.readline())
-            end = self.input_to_list(input_file.readline())
+
+            start_and_stop_positions = self.input_to_list(input_file.readline())
+
+            start = start_and_stop_positions[:2]
+            end = start_and_stop_positions[2:]
 
             obstacles = []
 
