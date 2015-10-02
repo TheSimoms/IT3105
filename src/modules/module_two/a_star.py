@@ -2,8 +2,8 @@ from common.a_star.a_star import AStar as BaseAStar
 
 
 class AStar(BaseAStar):
-    def __init__(self, start, ui, sleep_duration=0.0):
-        super(AStar, self).__init__(start, ui, sleep_duration=sleep_duration)
+    def __init__(self, start, ui):
+        super(AStar, self).__init__(start, ui)
 
     # Reports the number of open, closed, and total nodes expanded
     def report(self, final_node, open_nodes, closed_nodes):

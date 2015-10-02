@@ -37,7 +37,7 @@ class Node(BaseNode):
         return reduce(lambda x, y: x*y, self.get_number_of_possible_values()) == 1
 
     # h function
-    def heuristic(self, end_state=None):
+    def heuristic(self):
         return sum(self.get_number_of_possible_values()) - len(self.state.variables)
 
     # Returns list of possible values for each variable

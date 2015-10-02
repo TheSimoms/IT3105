@@ -9,7 +9,7 @@ class Node(object):
         self.end_state = end_state  # Goal state
 
         self.g = 0  # Initial g value. Is updated when a new parent is set
-        self.h = self.heuristic(self.end_state)  # h value
+        self.h = self.heuristic()  # h value
 
         self.add_parent(parent)  # Adds initial parent
 
@@ -22,14 +22,14 @@ class Node(object):
         raise NotImplementedError
 
     # h function
-    def heuristic(self, end_state=None):
+    def heuristic(self):
         raise NotImplementedError
 
     # Returns whether the node is a solution or not
     def is_solution(self):
         raise NotImplementedError
 
-    # g function
+    # Cost of going from one node to another. Usually returns 1. May be overwritten
     def arc_cost(self, neighbour_state=None):
         return 1
 
@@ -58,6 +58,7 @@ class Node(object):
 
         # Updates children's g value where necessary
         for child in self.children:
+            # Only updates children where self isn't already parent
             if child.parent != self:
                 new_g = self.g + self.arc_cost(child.state)  # Calculates new g for child
 

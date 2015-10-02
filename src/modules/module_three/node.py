@@ -37,5 +37,5 @@ class Node(BaseNode):
         return not self.h
 
     # h function
-    def heuristic(self, end_state=None):
+    def heuristic(self):
         return sum([len(variable) for variable in self.state.variables.values() if len(variable) != 1])

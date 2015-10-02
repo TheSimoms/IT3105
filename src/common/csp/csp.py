@@ -82,6 +82,4 @@ class ConstraintInstance(object):
     # Generates the constraint function from the constraint expression
     @staticmethod
     def generate_function(variables, expression, environment=globals()):
-        arguments = ",".join(variables)
-
-        return eval("(lambda %s: %s)" % (arguments, expression), environment)
+        return eval("(lambda %s: %s)" % (",".join(variables), expression), environment)

@@ -1,7 +1,6 @@
 import sys
 import itertools
 
-from common.csp.csp import CSP
 from common.csp.csp import ConstraintInstance
 from common.csp_a_star.csp_a_star import CSPAStar
 
@@ -11,9 +10,8 @@ from modules.module_three.ui import Ui
 
 
 class ModuleThree:
-    def __init__(self, task_file, sleep_duration=0.0, height=800):
+    def __init__(self, task_file, height=800):
         self.height = height
-        self.sleep_duration = sleep_duration
 
         self.dimensions, rows, columns = self.generate_task(task_file)
 
@@ -108,7 +106,7 @@ class ModuleThree:
     def run(self):
         ui = Ui(self.dimensions, self.height)
 
-        CSPAStar(self.variables, self.constraints, AStar, Node, ui.update_ui, self.sleep_duration).run()
+        CSPAStar(self.variables, self.constraints, AStar, Node, ui.update_ui).run()
 
 
 class ElementPermutation(object):
@@ -121,9 +119,4 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print('You need to supply a file containing the problem description and number of colors')
     else:
-        if len(sys.argv) == 3:
-            sleep = float(sys.argv[2])
-        else:
-            sleep = 0.0
-
-        ModuleThree(sys.argv[1], sleep)
+        ModuleThree(sys.argv[1])
