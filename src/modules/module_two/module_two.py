@@ -1,5 +1,7 @@
 import sys
 
+sys.path.append('../../')
+
 from operator import itemgetter
 
 from common.csp.csp import ConstraintInstance
@@ -18,13 +20,19 @@ class ModuleTwo:
         # Reads input file
         self.nv, self.ne, self.vertices, self.edges = self.generate_task(task_file)
 
-        self.colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']  # List of possible colors
-        self.number_of_colors = number_of_colors  # Number of colors to use in the algorithm
+        # Number of colors to use in the algorithm
+        self.number_of_colors = number_of_colors
+
+        # List of possible colors
+        self.colors = [
+            'red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet', 'pink', 'gray', 'chocolate'
+        ]
 
         self.variables = self.generate_variables()  # Generates variables
         self.constraints = self.generate_constraints()  # Generates constraints
 
-        self.run()  # Runs the A*-GAC algorithm
+        # Runs the A*-GAC algorithm
+        self.run()
 
     # Reads a vertex from the input file
     @staticmethod
@@ -76,16 +84,20 @@ class ModuleTwo:
     # Reads the input file
     def generate_task(self, input_file_name):
         with open(input_file_name) as input_file:
+            # Reads the number of vertices and edges
             nv, ne = self.read_integer_pair(input_file.readline())
 
             vertices = {}
             edges = []
 
+            # Reads the vertices
             for i in range(nv):
                 self.read_vertex(input_file.readline(), vertices)
 
+            # Rescales the vertices, so that they can be easily displayed in the UI
             self.rescale_vertices(vertices)
 
+            # Reads the edges
             for i in range(ne):
                 edges.append(self.read_edge(input_file.readline()))
 

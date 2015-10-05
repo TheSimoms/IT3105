@@ -1,6 +1,8 @@
 import sys
 import itertools
 
+sys.path.append('../../')
+
 from common.csp.csp import ConstraintInstance
 from common.csp_a_star.csp_a_star import CSPAStar
 
@@ -11,10 +13,12 @@ from modules.module_three.ui import Ui
 
 class ModuleThree:
     def __init__(self, task_file, height=800):
-        self.height = height
+        self.height = height  # Height of the UI
 
+        # Reads the task input
         self.dimensions, rows, columns = self.generate_task(task_file)
 
+        # Elements used to build the variables
         self.rows = None
         self.columns = None
 

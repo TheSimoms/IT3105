@@ -23,6 +23,7 @@ class Node(BaseNode):
         for value in variables[next_variable]:
             csp = CSP(deepcopy(variables), constraints)
 
+            # Adds node as neighbour if no contradictions arose
             if csp.rerun(next_variable, value) is not None:
                 neighbours.append(Node(self, csp))
 

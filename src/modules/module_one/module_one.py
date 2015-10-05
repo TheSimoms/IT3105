@@ -1,11 +1,13 @@
 import sys
 
+sys.path.append('../../')
+
 from modules.module_one.a_star import AStar
 from modules.module_one.node import Node
 
 
 class ModuleOne:
-    def __init__(self, task_file, sleep_duration=0.0):
+    def __init__(self, task_file):
         # Generates task space, grid size, and start and goal states
         self.task_space, self.grid_size, self.start_state, self.end_state = self.generate_task(task_file)
 
@@ -14,9 +16,9 @@ class ModuleOne:
         self.end = Node(None, self.end_state, self.end_state)
 
         # Runs the three kinds of search
-        BreadthFirst(self.task_space, self.start, self.end, sleep_duration)
-        DepthFirst(self.task_space, self.start, self.end, sleep_duration)
-        BestFirst(self.task_space, self.start, self.end, sleep_duration)
+        BreadthFirst(self.task_space, self.start, self.end)
+        DepthFirst(self.task_space, self.start, self.end)
+        BestFirst(self.task_space, self.start, self.end)
 
     # Takes an space separated list of integers. Returns list of the integers
     @staticmethod
@@ -57,8 +59,8 @@ class ModuleOne:
 
 
 class BreadthFirst(AStar):
-    def __init__(self, task_space, start, end, sleep_duration=0.0):
-        super(BreadthFirst, self).__init__(task_space, start, end, 'Breadth first', sleep_duration)
+    def __init__(self, task_space, start, end):
+        super(BreadthFirst, self).__init__(task_space, start, end, 'Breadth first')
 
     # Picks next node as queue
     def f(self):
@@ -66,8 +68,8 @@ class BreadthFirst(AStar):
 
 
 class DepthFirst(AStar):
-    def __init__(self, task_space, start, end, sleep_duration=0.0):
-        super(DepthFirst, self).__init__(task_space, start, end, 'Depth first', sleep_duration)
+    def __init__(self, task_space, start, end):
+        super(DepthFirst, self).__init__(task_space, start, end, 'Depth first')
 
     # Picks next node as stack
     def f(self):
@@ -75,17 +77,12 @@ class DepthFirst(AStar):
 
 
 class BestFirst(AStar):
-    def __init__(self, task_space, start, end, sleep_duration=0.0):
-        super(BestFirst, self).__init__(task_space, start, end, 'Best first', sleep_duration)
+    def __init__(self, task_space, start, end):
+        super(BestFirst, self).__init__(task_space, start, end, 'Best first')
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print('You need to supply a file containing the problem description')
     else:
-        if len(sys.argv) == 3:
-            sleep = float(sys.argv[2])
-        else:
-            sleep = 0.0
-
-        ModuleOne(sys.argv[1], sleep)
+        ModuleOne(sys.argv[1])

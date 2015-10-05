@@ -19,6 +19,6 @@ class AStar(BaseAStar):
 
         # Pause to see the result
         try:
-            input('Press return to continue')
+            input('Press return to continue\n')
         except SyntaxError:
             pass
