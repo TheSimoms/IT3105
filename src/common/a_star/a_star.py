@@ -19,7 +19,7 @@ class AStar(object):
 
     # Function to pick next node. May be overwritten to implement breadth- of depth first searches
     def f(self):
-        return min(self.open, key=lambda x: -1 if x.is_solution() else (x.g+x.h))
+        return min(self.open, key=lambda x: (x.g+x.h))
 
     # Adds node to open list. Updates state of node
     def open_node(self, node):

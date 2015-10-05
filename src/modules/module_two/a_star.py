@@ -19,3 +19,8 @@ class AStar(BaseAStar):
         print('- Total number of nodes: %s' % (len(open_nodes)+len(closed_nodes)))
         print('- Number of expanded nodes: %d' % len(closed_nodes))
         print('- Path length: %d' % len(self.build_path(final_node)))
+
+        try:
+            input('Press return to continue')
+        except SyntaxError:
+            pass

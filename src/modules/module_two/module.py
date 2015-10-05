@@ -71,8 +71,8 @@ class ModuleTwo:
         self.width = diff_x * self.height / diff_y
 
         # Calculates how much to scale each coordinate with in each direction
-        scale_x = (self.width - 30.0) / diff_x
-        scale_y = (self.height - 30.0) / diff_y
+        scale_x = (self.width - 20.0) / diff_x
+        scale_y = (self.height - 20.0) / diff_y
 
         # Iterates over all the vertices and rescales the coordinates
         for vertex in vertices:
@@ -121,7 +121,7 @@ class ModuleTwo:
         return constraints
 
     def run(self):
-        ui = Ui(self.vertices, self.edges, self.width, self.height)
+        ui = Ui(self.vertices, self.edges, int(self.width), self.height)
 
         CSPAStar(self.variables, self.constraints, AStar, Node, ui.update_ui).run()
 

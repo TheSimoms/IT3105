@@ -1,72 +1,79 @@
-from threading import Thread
-from Tkinter import Tk, Canvas as BaseCanvas
+import pygame
 
 
-class Ui(Thread):
+class Ui:
     def __init__(self, vertices, edges, width, height):
-        Thread.__init__(self)
-
-        self.vertices = vertices
-        self.edges = edges
-
-        self.width = width
-        self.height = height
-
-        self.root_window = None
-        self.ui = None
-
-        self.start()
-
-    def quit(self):
-        self.root_window.destroy()
-
-    def run(self):
-        self.root_window = Tk()
-
-        self.root_window.protocol('WM_DELETE_WINDOW', self.quit)
-        self.root_window.title('GAC + A*')
-
-        self.ui = Canvas(self.root_window, self.vertices, self.edges, self.width, self.height)
-        self.ui.pack()
-
-        self.root_window.mainloop()
-
-    def update_ui(self, node, open_nodes, closed_nodes):
-        if self.ui:
-            self.ui.update_ui(node, open_nodes, closed_nodes)
-
-
-class Canvas(BaseCanvas):
-    def __init__(self, parent_window, vertices, edges, width, height):
-        BaseCanvas.__init__(self, parent_window, width=width, height=height)
-
-        self.vertices = vertices
-        self.edges = edges
-
-        for edge in edges:
-            self.create_line(
-                vertices[edge[0]]['x'],
-                vertices[edge[0]]['y'],
-                vertices[edge[1]]['x'],
-                vertices[edge[1]]['y'],
-            )
+        self.screen = None
+        self.clock = None
 
         self.vertices = {
-            vertex_id: self.create_circle(vertex['x'], vertex['y'], 10, fill="black")
-            for vertex_id, vertex in vertices.items()
+            vertex_id: vertex for vertex_id, vertex in vertices.items()
         }
 
-    def create_circle(self, x, y, r, **kwargs):
-        return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
+        self.edges = edges
 
-    def set_vertex_color(self, color, vertex_id):
-        self.itemconfig(self.vertices[vertex_id], fill=color)
+        self.window_size = [width+20, height+20]
+
+        self.colors = {
+            'black': (0, 0, 0),
+            'red': (255, 0, 0),
+            'orange': (255, 102, 0),
+            'yellow': (255, 255, 0),
+            'green': (0, 255, 0),
+            'blue': (0, 0, 255),
+            'indigo': (46, 8, 84),
+            'violet': (138, 43, 226),
+            'pink': (255, 105, 180),
+            'gray': (211, 211, 211),
+            'chocolate': (210, 105, 30)
+        }
+
+        self.init_game('Vertex colouring')
+
+        self.screen.fill((255, 255, 255))
+
+        for edge in self.edges:
+            self.draw_line(
+                (self.vertices[edge[0]]['x'], self.vertices[edge[0]]['y']),
+                (self.vertices[edge[1]]['x'], self.vertices[edge[1]]['y']),
+            )
+
+
+    def init_game(self, title):
+        pygame.init()
+
+        self.screen = pygame.display.set_mode(self.window_size)
+        self.clock = pygame.time.Clock()
+
+        pygame.display.set_caption(title)
+
+    def draw_circle(self, x, y, color):
+        pygame.draw.circle(
+            self.screen,
+            self.colors[color],
+            (x, y),
+            10
+        )
+
+    def draw_line(self, start_pos, end_pos):
+        pygame.draw.line(
+            self.screen,
+            self.colors['black'],
+            start_pos,
+            end_pos
+        )
 
     def update_ui(self, node, open_nodes, closed_nodes):
         variables = node.state.variables
 
-        for variable, domain in variables.items():
+        for variable in sorted(variables.keys()):
+            domain = variables[variable]
+
             if len(domain) != 1:
-                self.set_vertex_color("black", variable)
+                self.draw_circle(self.vertices[variable]['x'], self.vertices[variable]['y'], "black")
             else:
-                self.set_vertex_color(domain[0], variable)
+                self.draw_circle(self.vertices[variable]['x'], self.vertices[variable]['y'], variables[variable][0])
+
+        self.clock.tick(60)
+
+        pygame.display.update()
