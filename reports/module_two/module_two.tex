@@ -44,8 +44,7 @@ if csp.rerun(next_variable, value) is not None:
 A copy of the variables is made, before the rerun function is executed. This (hopefully) reduces the domains of some variables. The CSP, with reduced variables, is then added as the state of the new neighbour node.
 
 \section{Explanation}
-\begin{enumerate}[label=\alph*)]
-\item To create the code chunks, I basically copied the method supplied in the lecture notes. The \textit{generate\_function} function takes in a list of variable names, and an logical expression containing all the variable names. A function that evaluates the expression using \textit{eval} and \textit{lambda} is returned.
+To create the code chunks, I basically copied the method supplied in the lecture notes. The \textit{generate\_function} function takes in a list of variable names, and an logical expression containing all the variable names. A function that evaluates the expression using \textit{eval} and \textit{lambda} is returned.
 \begin{lstlisting}[language=Python]
 @staticmethod
 def generate_function(variables, expression,
@@ -54,15 +53,13 @@ def generate_function(variables, expression,
     return eval("(lambda %s: %s)" % (",".join(variables),
         expression), environment)
 \end{lstlisting}
-\item In the vertex colouring problem, the only thing that matters is that neighbouring vertices don't have the same colour. To interpret this into canonical form is simply making sure the values of two adjacent vertices are unequal.
+In the vertex colouring problem, the only thing that matters is that neighbouring vertices don't have the same colour. To interpret this into canonical form is simply making sure the values of two adjacent vertices are unequal.
 \begin{lstlisting}[language=Python]
 @staticmethod
 for edge in self.edges:
     variables = [node for node in edge]
     expression = '%s!=%s' % (edge[0], edge[1])
 \end{lstlisting}
-\item This contradicts point b). I haven't avoided using "both code chunks and a hand-built interpreter".
-\end{enumerate}
 
 % End content
 
