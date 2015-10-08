@@ -62,8 +62,8 @@ class Ui:
         self.screen.blit(
             self.font.render(value, 1, (0, 0, 0)),
             (
-                self.cell_size * (0.5 + x) - 0.15*self.font_size*len(value),
-                self.cell_size * (0.5 + y) - 0.20*self.font_size
+                self.cell_size * (0.5 + x) - 0.30 * self.font_size*len(value),
+                self.cell_size * (0.5 + y) - 50
             )
         )
 

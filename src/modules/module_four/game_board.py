@@ -6,6 +6,9 @@ from math import log
 from copy import deepcopy
 
 
+EVAL_CACHE = {}
+
+
 DIRECTIONS = {
     'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
     'right': [[1, 0], [[3, 2, 1, 0], [0, 1, 2, 3]]],
@@ -183,6 +186,11 @@ class GameBoard:
         return max(max([self.get_value_at_position(x, y) for y in [0, 1, 2, 3]]) for x in [0, 1, 2, 3])
 
     def evaluate(self):
+        state_id = str(self.get_cell_values())
+
+        if state_id in EVAL_CACHE:
+            return EVAL_CACHE[state_id]
+
         number_of_empty_cells = self.get_number_of_empty_cells()
         number_of_empty_cells_log = log(number_of_empty_cells) if number_of_empty_cells else 0.0
 
@@ -192,7 +200,11 @@ class GameBoard:
             self.tidy() * EVAL_WEIGHTS['tidy']
         ]
 
-        return sum(weights)
+        score = sum(weights)
+
+        EVAL_CACHE[state_id] = score
+
+        return score
 
     def tidy(self):
         score = 0
