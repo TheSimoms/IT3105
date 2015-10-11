@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append('../../')
+
 from modules.module_four.twenty_forty_eight import TwentyFortyEight
 from modules.module_four.ui import Ui
 

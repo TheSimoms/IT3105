@@ -6,9 +6,6 @@ from math import log
 from copy import deepcopy
 
 
-EVAL_CACHE = {}
-
-
 DIRECTIONS = {
     'up': [[0, -1], [[0, 1, 2, 3], [0, 1, 2, 3]]],
     'right': [[1, 0], [[3, 2, 1, 0], [0, 1, 2, 3]]],
@@ -18,7 +15,6 @@ DIRECTIONS = {
 
 EVAL_WEIGHTS = {
     'empty': 0.5,
-    'max': 0.0,
     'tidy': 2
 }
 
@@ -54,14 +50,6 @@ class GameBoard:
 
         return values
 
-    def has_2048(self):
-        for x in [0, 1, 2, 3]:
-            for y in [0, 1, 2, 3]:
-                if self.get_value_at_position(x, y) >= 11:
-                    return True
-
-        return False
-
     def get_empty_cells(self):
         return [[x, y] for y in [0, 1, 2, 3] for x in [0, 1, 2, 3] if not self.get_value_at_position(x, y)]
 
@@ -85,20 +73,8 @@ class GameBoard:
 
         return 0
 
-    def get_value_at_absolute_position(self, i):
-        return self.get_value_at_position(i // 3, i % 3)
-
     def get_value_at_index(self, index):
         return self.get_value_at_position(index[0], index[1])
-
-    def get_value_at_cell(self, cell):
-        if cell:
-            return self.get_value_at_position(cell.position[0], cell.position[1])
-        else:
-            return 0
-
-    def is_index_occupied(self, index):
-        return self.get_value_at_index(index) > 0
 
     def prepare_cells_for_move(self):
         for x in [0, 1, 2, 3]:
@@ -182,37 +158,22 @@ class GameBoard:
 
         return does_move_change_state
 
-    def get_max_value(self):
-        return max(max([self.get_value_at_position(x, y) for y in [0, 1, 2, 3]]) for x in [0, 1, 2, 3])
-
     def evaluate(self):
-        state_id = str(self.get_cell_values())
-
-        if state_id in EVAL_CACHE:
-            return EVAL_CACHE[state_id]
-
         number_of_empty_cells = self.get_number_of_empty_cells()
         number_of_empty_cells_log = log(number_of_empty_cells) if number_of_empty_cells else 0.0
 
         weights = [
             number_of_empty_cells_log * EVAL_WEIGHTS['empty'],
-            (2 ** self.get_max_value()) * EVAL_WEIGHTS['max'],
             self.tidy() * EVAL_WEIGHTS['tidy']
         ]
 
-        score = sum(weights)
+        return sum(weights)
 
-        EVAL_CACHE[state_id] = score
-
-        return score
+    def get_max_value(self):
+        return max(max([self.get_value_at_position(x, y) for y in [0, 1, 2, 3]]) for x in [0, 1, 2, 3])
 
     def tidy(self):
-        score = 0
-
-        for n in range(16):
-            score += (self.get_value_at_index(PATH[n]) ** 2) * (R ** n)
-
-        return score
+        return sum((self.get_value_at_index(PATH[n]) ** 2) * (R ** n) for n in range(16))
 
     def clone(self):
         return GameBoard(deepcopy(self.state))
