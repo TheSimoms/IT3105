@@ -1,8 +1,4 @@
-from numpy.random import choice
-from numpy import add
-
-from math import log
-
+from numpy import random, add
 from copy import deepcopy
 
 
@@ -11,11 +7,6 @@ DIRECTIONS = {
     'right': [[1, 0], [[3, 2, 1, 0], [0, 1, 2, 3]]],
     'down': [[0, 1], [[0, 1, 2, 3], [3, 2, 1, 0]]],
     'left': [[-1, 0], [[0, 1, 2, 3], [0, 1, 2, 3]]]
-}
-
-EVAL_WEIGHTS = {
-    'empty': 0.5,
-    'tidy': 2
 }
 
 PATH = [
@@ -83,11 +74,10 @@ class GameBoard:
 
                 if cell:
                     cell.merged = False
-                    cell.previous_position = cell.position[:]
 
     @staticmethod
     def get_next_spawning():
-        return choice([1, 2], p=[0.9, 0.1])
+        return random.choice([1, 2], p=[0.9, 0.1])
 
     def get_closest_neighbour(self, curr, step):
         prev = curr
@@ -113,7 +103,7 @@ class GameBoard:
 
     def make_computer_move(self):
         empty_cells = self.get_empty_cells()
-        next_cell_index = choice(range(len(empty_cells))) if empty_cells else None
+        next_cell_index = random.choice(range(len(empty_cells))) if empty_cells else None
 
         if next_cell_index is not None:
             self.add_cell_to_grid(Cell(empty_cells[next_cell_index], self.get_next_spawning()))
@@ -159,15 +149,7 @@ class GameBoard:
         return does_move_change_state
 
     def evaluate(self):
-        number_of_empty_cells = self.get_number_of_empty_cells()
-        number_of_empty_cells_log = log(number_of_empty_cells) if number_of_empty_cells else 0.0
-
-        weights = [
-            number_of_empty_cells_log * EVAL_WEIGHTS['empty'],
-            self.tidy() * EVAL_WEIGHTS['tidy']
-        ]
-
-        return sum(weights)
+        return self.tidy()
 
     def get_max_value(self):
         return max(max([self.get_value_at_position(x, y) for y in [0, 1, 2, 3]]) for x in [0, 1, 2, 3])
@@ -185,7 +167,6 @@ class Cell:
         self.value = value
 
         self.merged = merged
-        self.previous_position = None
 
     def change_position(self, position):
         self.position = position[:]
