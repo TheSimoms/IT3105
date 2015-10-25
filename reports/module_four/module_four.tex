@@ -42,12 +42,12 @@ def get_depth():
     else:
         return 3
 \end{lstlisting}
-I found this choice of depth to be sufficient in order to achieve 2048. It might not be the best way of doing it, but it yields consistent results good enough to achieve the top score for this assignment.
+I found this choice of depth to be sufficient in order to achieve 2048. It is very shallow compared to other implementations, but it yields consistent results good enough to achieve the top score for this assignment.
 
 My expectimax implementation consists of two main components (Python functions);
 \begin{itemize}
-    \item evaluate\_player\_move(depth): This function returns the expected score of the current game board. For the four different directions to make a move, the outcome of making the move is evaluated. If the depth is 0, whatever move yields the highest score is returned. If not, the function evaluate\_computer\_move is ran (with same depth), and whatever move yields the highest expected score is returned.
-    \item evaluate\_computer\_move(depth): In this function, all possible computer moves are simulated (a computer move is just spawning a 2 or 4, with probabilities 0.9 and 0.1, respectively, at a random empty cell). For every possible computer move, the evaluate\_player\_move (with one less depth) is ran. All the results of running evaluate\_player\_move are weighted, and the mean is returned.
+    \item evaluate\_player\_move(depth): This function returns the expected score (heuristic value) of the current game board. For the four different directions to make a move, the outcome of making the move is evaluated. If the depth is 0, whatever move yields the highest score is returned. If not, the function evaluate\_computer\_move is run (with same depth), and whatever move yields the highest expected score is returned.
+    \item evaluate\_computer\_move(depth): In this function, all possible computer moves are simulated (a computer move is just spawning a 2 or 4, with probabilities 0.9 and 0.1, respectively, at a random empty cell). For every possible computer move, the evaluate\_player\_move (with one less depth) is run. All the results of running evaluate\_player\_move are weighted, and the mean is returned.
 \end{itemize}
 
 \section{Heuristic}
@@ -62,13 +62,15 @@ The board is organized into a "path", following the pattern in figure \hyperref[
 \end{figure}
 Each cell in the path is given a label, $p_n$, with $p_0$ being the upper left cell, $p_1$ the one below, and so on all the way to $p_{15}$ in the upper right corner.
 
-The score of the board is then calculated using this formula;
+The score (heuristic value) of the board is then calculated using this formula;
 \begin{equation}
 	\sum\limits_{n=0}^{15}value(p_n)*r^n
 \end{equation}
 where $value(p_n)$ is the value at cell $p_n$, and $r$ is a constant in the range $(0, 1)$ (set to 0.25 during the demo session).
 
-This enforces a monotonic decreasing order along the path, as $r^n$ decreases for each step. Example: With $r=0.25$, a 512 in cell $p_n$ would yield four times as much to the score as it would in cell $p_{n+1}$. A 512 in cell $p_n$ would be equivalent to a 2048 in cell $p_{n+1}$. The AI will therefore do what it can to get the larger values as close to the start of the path as possible.
+This enforces a monotonic decreasing order along the path, as $r^n$ decreases for each step. The AI will therefore do what it can to get the larger values as close to the start of the path as possible. Since the AI tries to put the highest values as early in the path as possible, it will gather them, allowing them to merge together to form even higher values.
+
+Example: With $r=0.25$, a 512 in cell $p_n$ would yield four times as much to the score as it would in cell $p_{n+1}$. A 512 in cell $p_n$ would be equivalent to a 2048 in cell $p_{n+1}$.
 
 % End content
 
