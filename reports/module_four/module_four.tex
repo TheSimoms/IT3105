@@ -50,6 +50,10 @@ My expectimax implementation consists of two main components (Python functions);
     \item evaluate\_computer\_move(depth): In this function, all possible computer moves are simulated (a computer move is just spawning a 2 or 4, with probabilities 0.9 and 0.1, respectively, at a random empty cell). For every possible computer move, the evaluate\_player\_move (with one less depth) is run. All the results of running evaluate\_player\_move are weighted, and the mean is returned.
 \end{itemize}
 
+The two functions combined create a recursive search algorithm. The algorithm evaluates the next (player) move, and the $n$ next moves thereafter, with $n$ being the depth of the search.
+
+For each time the player is about to make a move, each of the four possible directions to move are evaluated. If the move is valid (changes state), all possible computer moves following it are simulated. The algorithm restart from each of the simulated states.
+
 \section{Heuristic}
 I used a rather simple heuristic function in my implementation of the 2048 solver.
 
