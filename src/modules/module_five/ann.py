@@ -15,12 +15,15 @@ from modules.module_five.mnist import mnist_basics
 
 class Ann:
     def __init__(self, hidden_layer_sizes, activation_functions, number_of_inputs=784, number_of_outputs=10,
-                 learning_rate=0.1, error_limit=1e-5):
+                 learning_rate=0.1, error_limit=1e-5, batch_size=100, max_epochs=100):
         self.activation_functions = activation_functions
         self.number_of_inputs = number_of_inputs
         self.number_of_outputs = number_of_outputs
+
         self.learning_rate = learning_rate
         self.error_limit = error_limit
+        self.batch_size = batch_size
+        self.max_epochs = max_epochs
 
         if len(hidden_layer_sizes) != len(activation_functions):
             logging.error('The number of hidden layers and number of activation functions does not match')
@@ -42,6 +45,17 @@ class Ann:
 
     @staticmethod
     def generate_hidden_layers(input_values, number_of_inputs, hidden_layer_sizes, activation_functions):
+        """
+        Generate hidden layers based on number of inputs, number of nodes in the layers, and the layers' activation
+        functions
+
+        :param input_values: Initial input values
+        :param number_of_inputs: Number of inputs
+        :param hidden_layer_sizes: List of number of nodes in the hidden layers
+        :param activation_functions: List of activation functions for the hidden layers
+        :return: List of hidden layers
+        """
+
         hidden_layers = [
             HiddenLayer(0, input_values, number_of_inputs, hidden_layer_sizes[0], activation_functions[0])
         ]
@@ -57,6 +71,11 @@ class Ann:
         return hidden_layers
 
     def generate_functions(self):
+        """
+        Generate the Theano training and testing functions
+
+        :return: Theano training and testing functions
+        """
         step_cost = -T.mean(
             T.log(self.output_layer.output)[T.arange(self.correct_labels.shape[0]), self.correct_labels]
         )
@@ -90,29 +109,35 @@ class Ann:
 
         return training_function, testing_function
 
-    def train(self, filename='all_flat_mnist_training_cases', batch_size=100, max_epochs=100):
+    def train(self, filename='all_flat_mnist_training_cases'):
+        """
+        Train the network using data in supplied file
+
+        :param filename: Name of file containing training data
+        """
+
         logging.info('Entering training')
         logging.info('Loading training data from file \'mnist/%s\'' % filename)
 
-        features, correct_labels = self.load_data(filename)
+        feature_sets, correct_labels = self.load_data(filename)
 
-        logging.info('Loading complete')
+        logging.info('Loading completed')
 
-        number_of_batches = int(len(features) / batch_size)
+        number_of_batches = int(len(feature_sets) / self.batch_size)
         mean_accuracy = 0.0
 
         logging.info('Starting training')
 
         epoch = 0
 
-        while epoch < max_epochs and 1.0-mean_accuracy > self.error_limit:
+        while epoch < self.max_epochs and 1.0-mean_accuracy > self.error_limit:
             logging.info('Epoch %d' % epoch)
 
             training_accuracy = []
 
             for i in range(number_of_batches):
-                batch_input_values = features[i * batch_size:(i+1) * batch_size]
-                batch_labels = correct_labels[i * batch_size:(i+1) * batch_size]
+                batch_input_values = feature_sets[i * self.batch_size:(i+1) * self.batch_size]
+                batch_labels = correct_labels[i * self.batch_size:(i+1) * self.batch_size]
 
                 results = self.training_function(batch_input_values, batch_labels)
                 accuracy = sum(results == batch_labels) / float(len(batch_labels))
@@ -125,48 +150,52 @@ class Ann:
 
             epoch += 1
 
-        logging.info('Training complete. An average accuracy of %s%% was achieved' % str(mean_accuracy*100))
+        logging.info('Training completed. An average accuracy of %s%% was achieved' % str(mean_accuracy*100))
 
-    def blind_test(self, features, correct_labels):
+    def blind_test(self, feature_sets):
         """
-        Classify set of features
+        Classify set of feature_sets
 
-        :param features: List of feature sets to classify
+        :param feature_sets: List of feature sets to classify
 
         :return List of labels for classified feature sets
         """
-        logging.info('Entering testing')
+        logging.info('Entering blind testing')
 
-        self.normalize_features(features)
+        self.normalize_feature_sets(feature_sets)
 
-        results = self.testing_function(features)
-        accuracy = sum(results == correct_labels) / float(len(correct_labels))
+        logging.info('Blind testing completed')
 
-        logging.info('Testing complete. An accuracy of %s%% was achieved' % str(accuracy*100))
-
-        return results
+        return self.testing_function(feature_sets).tolist()
 
     @staticmethod
-    def normalize_features(features, max_value=255.0):
+    def normalize_feature_sets(feature_sets, max_value=255.0):
         """
         Normalize list of feature sets to fit in range [0, 1]. Normalization is in place
 
-        :param features: List of feature sets to normalize
+        :param feature_sets: List of feature sets to normalize
         :param max_value: Maximum value, value to be normalized to 1.0
         """
 
-        dimensions = len(features[0])
+        dimensions = len(feature_sets[0])
 
-        for feature in features:
+        for feature_set in feature_sets:
             for i in range(dimensions):
-                feature[i] /= max_value
+                feature_set[i] /= max_value
 
     def load_data(self, filename):
-        features, labels = mnist_basics.load_cases(filename, nested=False)
+        """
+        Load MNIST data from a file. Normalize the values
 
-        self.normalize_features(features)
+        :param filename: Name of file containing data to loda
+        :return: Normalized feature sets and labels from the supplied data
+        """
 
-        return features, labels
+        feature_sets, labels = mnist_basics.load_cases(filename, nested=False)
+
+        self.normalize_feature_sets(feature_sets)
+
+        return feature_sets, labels
 
 
 class HiddenLayer(object):
@@ -202,8 +231,3 @@ class OutputLayer(object):
         self.output_label = T.argmax(self.output, axis=1)
 
         self.parameters = [weights, bias]
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-
-    ann = Ann([50, 20], [T.tanh, T.tanh])
