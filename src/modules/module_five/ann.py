@@ -15,7 +15,7 @@ from modules.module_five.mnist import mnist_basics
 
 class Ann:
     def __init__(self, hidden_layer_sizes, activation_functions, number_of_inputs=784, number_of_outputs=10,
-                 learning_rate=0.1, error_limit=1e-5, batch_size=100, max_epochs=100):
+                 learning_rate=0.1, error_limit=1e-4, batch_size=100, max_epochs=100):
         self.activation_functions = activation_functions
         self.number_of_inputs = number_of_inputs
         self.number_of_outputs = number_of_outputs
