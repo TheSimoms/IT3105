@@ -1,22 +1,23 @@
 import sys
-
 import logging
+
 import numpy
 
 sys.path.append('../../')
 
-from modules.module_five.ann import Ann
+from common.ann.ann import Ann
 
 from modules.module_four.twenty_forty_eight import TwentyFortyEight
 from modules.module_four.ui import Ui
 
 
 TRAINING_DATA_FILENAME = 'generated-training-data.txt'
+TRAINING_DATA_FILENAME_INTEGER = 'training-data.txt'
 
 
 class Ann2048:
     def __init__(self, hidden_layer_sizes, activation_functions, number_of_inputs=16, number_of_outputs=4,
-                 learning_rate=0.1, error_limit=1e-4, batch_size=100, max_epochs=100, height=800):
+                 learning_rate=0.1, error_limit=1e-3, batch_size=100, max_epochs=100, height=800):
         self.ann = Ann(hidden_layer_sizes, activation_functions, number_of_inputs, number_of_outputs,
                        learning_rate, error_limit, batch_size, max_epochs)
 
@@ -43,16 +44,46 @@ class Ann2048:
 
         return kd_reduce(flatten, nested_list)
 
-    def train(self, filename=TRAINING_DATA_FILENAME):
+    def pre_process(self, feature_sets):
+        return feature_sets
+
+    def train(self, filename=TRAINING_DATA_FILENAME_INTEGER):
         """
         Train the network using supplied file
 
         :param filename: Filename containing training data
         """
 
-        feature_sets, correct_labels = self.ann.load_data(filename)
+        feature_sets, correct_labels = self.load_integer_formatted_data(filename)
+
+        feature_sets = self.pre_process(feature_sets)
 
         self.ann.start_training(feature_sets, correct_labels)
+
+    @staticmethod
+    def list_from_integer(integer):
+        return list(map(lambda x: (integer >> x*4) & 0xf, range(16)))
+
+    def load_integer_formatted_data(self, filename):
+        """
+        Load data from a file, where the states are formatted as integers
+
+        :param filename: Name of file containing data to load
+        :return: Feature sets and labels from the supplied data
+        """
+
+        feature_sets = []
+        correct_labels = []
+
+        with open(filename, 'r') as f:
+            for line in f.readlines():
+                line = line.strip()
+                content = line.split(',')
+
+                feature_sets.append(self.list_from_integer(int(content[0])))
+                correct_labels.append(int(content[1]))
+
+        return feature_sets, correct_labels
 
     def play_intelligently(self):
         """

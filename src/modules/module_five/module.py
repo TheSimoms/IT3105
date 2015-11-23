@@ -1,12 +1,11 @@
 import sys
-
 import logging
 
 import theano.tensor as T
 
 sys.path.append('../../')
 
-from modules.module_five.ann import Ann
+from common.ann.ann import Ann
 from modules.module_five.mnist import mnist_basics, mnistdemo
 
 
