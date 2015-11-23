@@ -63,17 +63,24 @@ class Ann2048:
 
         return feature_sets
 
-    def train(self, filename=TRAINING_DATA_FILENAME_INTEGER, filename2=None):
+    def train(self, filename=TRAINING_DATA_FILENAME, filename_integer=None):
         """
         Train the network using supplied file
 
         :param filename: Filename containing training data
         """
 
-        feature_sets, correct_labels = self.load_integer_formatted_data(filename)
+        feature_sets = []
+        correct_labels = []
 
-        if filename2:
-            feature_sets1, correct_labels1 = self.ann.load_data(filename2)
+        if filename:
+            feature_sets1, correct_labels1 = self.ann.load_data(filename)
+
+            feature_sets += feature_sets1
+            correct_labels += correct_labels1
+
+        if filename_integer:
+            feature_sets1, correct_labels1 = self.load_integer_formatted_data(filename_integer)
 
             feature_sets += feature_sets1
             correct_labels += correct_labels1
@@ -192,7 +199,7 @@ class Ann2048:
         logging.info('Completed playing the random games. Mean highest value: %f' % numpy.mean(results[0]))
 
         # Training the neural network
-        self.train(TRAINING_DATA_FILENAME_INTEGER, TRAINING_DATA_FILENAME)
+        self.train()
 
         # Playing using the neural network
         for i in range(50):
