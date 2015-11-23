@@ -14,7 +14,7 @@ from modules.module_five.mnist import mnist_basics
 
 
 class Ann:
-    def __init__(self, hidden_layer_sizes, activation_functions, number_of_inputs=784, number_of_outputs=10,
+    def __init__(self, hidden_layer_sizes, activation_functions, number_of_inputs=784, number_of_outputs=50,
                  learning_rate=0.1, error_limit=1e-4, batch_size=100, max_epochs=100):
         self.activation_functions = activation_functions
         self.number_of_inputs = number_of_inputs
@@ -109,24 +109,19 @@ class Ann:
 
         return training_function, testing_function
 
-    def train(self, filename='all_flat_mnist_training_cases'):
+    def start_training(self, feature_sets, correct_labels):
         """
-        Train the network using data in supplied file
+        Train the network using supplied feature sets and labels
 
-        :param filename: Name of file containing training data
+        :param feature_sets: List of training features
+        :param correct_labels: List of correct labels, corresponding to the training features
+        :return Number of epochs and, and final accuracy
         """
 
-        logging.info('Entering training')
-        logging.info('Loading training data from file \'mnist/%s\'' % filename)
-
-        feature_sets, correct_labels = self.load_data(filename)
-
-        logging.info('Loading completed')
+        logging.info('Starting training')
 
         number_of_batches = int(len(feature_sets) / self.batch_size)
         mean_accuracy = 0.0
-
-        logging.info('Starting training')
 
         epoch = 0
 
@@ -151,6 +146,38 @@ class Ann:
             epoch += 1
 
         logging.info('Training completed. An average accuracy of %s%% was achieved' % str(mean_accuracy*100))
+
+        return epoch, mean_accuracy
+
+    def train(self, filename='training-data.txt'):
+        """
+        Train the network using data in supplied file
+
+        :param filename: Path to file containing data
+        :return Number of epochs and, and final accuracy
+        """
+        logging.info('Loading training data from file \'%s\'' % filename)
+
+        feature_sets, correct_labels = self.load_data(filename)
+
+        logging.info('Loading completed')
+
+        return self.start_training(feature_sets, correct_labels)
+
+    def train_mnist(self, filename='all_flat_mnist_training_cases'):
+        """
+        Train the network using MNIST data in supplied file
+
+        :param filename: Path to file containing MNIST data
+        :return Number of epochs and, and final accuracy
+        """
+        logging.info('Loading training data from file \'mnist/%s\'' % filename)
+
+        feature_sets, correct_labels = self.load_mnist_data(filename)
+
+        logging.info('Loading completed')
+
+        return self.start_training(feature_sets, correct_labels)
 
     def blind_test(self, feature_sets):
         """
@@ -183,11 +210,33 @@ class Ann:
             for i in range(dimensions):
                 feature_set[i] /= max_value
 
-    def load_data(self, filename):
+    @staticmethod
+    def load_data(filename):
+        """
+        Load data from a file
+
+        :param filename: Name of file containing data to load
+        :return: Feature sets and labels from the supplied data
+        """
+
+        feature_sets = []
+        correct_labels = []
+
+        with open(filename, 'r') as f:
+            for line in f.readlines():
+                line = line.strip()
+                content = line.split(',')
+
+                feature_sets.append(int(content[0]))
+                correct_labels.append(content[1])
+
+        return feature_sets, correct_labels
+
+    def load_mnist_data(self, filename):
         """
         Load MNIST data from a file. Normalize the values
 
-        :param filename: Name of file containing data to loda
+        :param filename: Name of file containing data to load
         :return: Normalized feature sets and labels from the supplied data
         """
 

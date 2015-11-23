@@ -5,6 +5,7 @@ __author__ = 'keithd'
 
 import os, struct
 import time
+import logging
 from array import array as pyarray
 import matplotlib.pyplot as pyplot
 import numpy
@@ -185,7 +186,8 @@ def minor_demo(ann,ignore=0):
     def score_it(classification,k=4):
         params = {"results": str(ignore) + " " + str(classification), "raw": "1","k": k}
         resp = requests.post('http://folk.ntnu.no/valerijf/5/', data=params)
-        return resp.text
+
+        return int(resp.text.strip()[-1])
 
     def test_it(ann,cases,k=4):
         images,_ = cases
@@ -195,9 +197,13 @@ def minor_demo(ann,ignore=0):
     demo100 = load_flat_text_cases('demo100_text.txt')
     training_cases = load_flat_text_cases('all_flat_mnist_training_cases_text.txt')
     test_cases = load_flat_text_cases('all_flat_mnist_testing_cases_text.txt')
-    print('TEST Results:')
-    print('Training set: \n ',test_it(ann,training_cases,4))
-    print('Testing set:\n ',test_it(ann,test_cases,4))
-    print('Demo 100 set: \n ',test_it(ann,demo100,8))
 
+    training_result = test_it(ann,training_cases,4)
+    testing_result = test_it(ann,test_cases,4)
+    demo_result = test_it(ann,demo100,8)
 
+    # logging.info('Training set score: %d' % training_result)
+    # logging.info('Testing set score: %d' % testing_result)
+    # logging.info('Demo 100 set score: %d' % demo_result)
+
+    return training_result, testing_result, demo_result
