@@ -11,8 +11,8 @@ from modules.module_four.twenty_forty_eight import TwentyFortyEight
 from modules.module_four.ui import Ui
 
 
-TRAINING_DATA_FILENAME = 'generated-training-data.txt'
 TRAINING_DATA_FILENAME_INTEGER = 'training-data.txt'
+TRAINING_DATA_FILENAME = 'generated-training-data.txt'
 
 
 class Ann2048:
@@ -22,6 +22,20 @@ class Ann2048:
                        learning_rate, error_limit, batch_size, max_epochs)
 
         self.height = height
+
+    @staticmethod
+    def nest_list(flat_list):
+        """
+        Nest list. Return a nested 4x4 version of the flat lits supplied
+
+        :param flat_list: List to nest
+        :return: Nested list
+        """
+
+        nested_list = numpy.array(flat_list)
+        nested_list = numpy.reshape(nested_list, (4, 4))
+
+        return list(nested_list.tolist())
 
     @staticmethod
     def flatten_list(nested_list):
@@ -47,7 +61,7 @@ class Ann2048:
     def pre_process(self, feature_sets):
         return feature_sets
 
-    def train(self, filename=TRAINING_DATA_FILENAME_INTEGER):
+    def train(self, filename=TRAINING_DATA_FILENAME_INTEGER, filename2=None):
         """
         Train the network using supplied file
 
@@ -55,6 +69,12 @@ class Ann2048:
         """
 
         feature_sets, correct_labels = self.load_integer_formatted_data(filename)
+
+        if filename2:
+            feature_sets1, correct_labels1 = self.ann.load_data(filename2)
+
+            feature_sets += feature_sets1
+            correct_labels += correct_labels1
 
         feature_sets = self.pre_process(feature_sets)
 
@@ -170,7 +190,7 @@ class Ann2048:
         logging.info('Completed playing the random games. Mean highest value: %f' % numpy.mean(results[0]))
 
         # Training the neural network
-        self.train()
+        self.train(TRAINING_DATA_FILENAME_INTEGER, TRAINING_DATA_FILENAME)
 
         # Playing using the neural network
         for i in range(50):

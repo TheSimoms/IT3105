@@ -75,6 +75,9 @@ class GameBoard:
 
         return 0
 
+    def set_value_at_index(self, index, value):
+        self.state[index[0]][index[1]] = Cell(index, value)
+
     # Returns value at index
     def get_value_at_index(self, index):
         return self.get_value_at_position(index[0], index[1])
