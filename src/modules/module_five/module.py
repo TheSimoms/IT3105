@@ -66,11 +66,14 @@ def test_configurations(number_of_runs=20):
             logging.info('Results: %s' % str(result))
 
             # Adds the average gain from each run to the mean value
-            results[i][0] += float(result[0][0]) / number_of_runs
-            results[i][1] += float(result[0][1]) / number_of_runs
-            results[i][2] += float(result[0][2]) / number_of_runs
-            results[i][3] += float(result[1]) / number_of_runs
-            results[i][4] += float(result[2]) / number_of_runs
+            results[i][0] += float(result[0][0])
+            results[i][1] += float(result[0][1])
+            results[i][2] += float(result[0][2])
+            results[i][3] += float(result[1])
+            results[i][4] += float(result[2])
+
+        for j in range(len(results[i])):
+            results[i][j] /= number_of_runs
 
         logging.info('Configuration %d completed' % i)
         logging.info('Results %d: %s' % (i, str(results[i][:3])))
