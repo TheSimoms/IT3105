@@ -94,6 +94,7 @@ class Ann:
             (parameter, parameter - self.learning_rate*gradient) for parameter, gradient in zip(parameters, gradients)
         ]
 
+        # Theano function for training
         training_function = theano.function(
             inputs=[self.input_values, self.correct_labels],
             outputs=self.output_layer.output_label,
@@ -101,12 +102,14 @@ class Ann:
             allow_input_downcast=True
         )
 
+        # Theano function for testing and returning final answer
         testing_function = theano.function(
             inputs=[self.input_values],
             outputs=self.output_layer.output_label,
             allow_input_downcast=True
         )
 
+        # Theano function for testing and returning the weights of the output nodes
         testing_function_list = theano.function(
             inputs=[self.input_values],
             outputs=self.output_layer.output,
@@ -131,11 +134,13 @@ class Ann:
 
         epoch = 0
 
+        # Trains until one of the following happens: too many epochs are run, or the error rate is small enough
         while epoch < self.max_epochs and 1.0-mean_accuracy > self.error_limit:
             logging.info('Epoch %d' % epoch)
 
             training_accuracy = []
 
+            # Iterates through the batches
             for i in range(number_of_batches):
                 batch_input_values = feature_sets[i * self.batch_size:(i+1) * self.batch_size]
                 batch_labels = correct_labels[i * self.batch_size:(i+1) * self.batch_size]

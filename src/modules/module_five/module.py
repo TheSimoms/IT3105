@@ -15,25 +15,42 @@ class ModuleFive:
         self.ann = Ann(hidden_layer_sizes, activation_functions, learning_rate=learning_rate,
                        error_limit=error_limit, max_epochs=max_epochs)
 
+    # Trains the network, before calling the major_demo function
     def run(self, r=0):
         epochs, accuracy = self.ann.train_mnist()
 
         return mnistdemo.major_demo(self.ann, r, mnist_basics.__mnist_path__), epochs, accuracy
 
 
+# Function to be called at the demo day. Trains the network before calling the major_demo function
 def demo(r):
+    """
+    Train the network and call the major_demo function. Report results.
+
+    :param r: Integer given by the student assistants
+    """
+
     results = ModuleFive([784, 392, 196], [T.tanh, T.tanh, T.tanh]).run(r)
 
     logging.info('Scores: %s' % str(results[0]))
     logging.info('Epochs: %s, accuracy: %s' % (str(results[1]), str(results[2])))
 
 
-def test_configurations(number_of_runs=5):
+# Runs five different ANNs 20 times each. Reports statistics from training and testing
+def test_configurations(number_of_runs=20):
+    """
+    Train and test five different ANNs, 20 times each. Report statistics and results
+
+    :param number_of_runs: Number of times to run each configuration
+    """
+
     results = eval(repr([[0]*5]*5))
+
+    # The five different configurations
     configurations = [
-        [[200, 100], [T.tanh, T.tanh]],
-        [[100, 200, 100], [T.tanh, T.tanh, T.tanh]],
-        [[100, 250, 50], [T.tanh, T.tanh, T.tanh]],
+        [[50, 25], [T.tanh, T.tanh]],
+        [[100, 50], [T.tanh, T.tanh]],
+        [[150, 100, 50], [T.tanh, T.tanh, T.tanh]],
         [[392, 196, 98], [T.tanh, T.tanh, T.tanh]],
         [[784, 392, 196], [T.tanh, T.tanh, T.tanh]]
     ]
@@ -44,10 +61,12 @@ def test_configurations(number_of_runs=5):
         for j in range(number_of_runs):
             logging.info('Configuration %d, run %d' % (i, j))
 
+            # Trains and tests the network
             result = ModuleFive(configurations[i][0], configurations[i][1]).run()
 
             logging.info('Results: %s' % str(result))
 
+            # Adds the average gain from each run to the mean value
             results[i][0] += float(result[0][0]) / number_of_runs
             results[i][1] += float(result[0][1]) / number_of_runs
             results[i][2] += float(result[0][2]) / number_of_runs
