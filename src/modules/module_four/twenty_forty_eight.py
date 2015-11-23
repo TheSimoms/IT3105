@@ -1,4 +1,5 @@
 import random
+import logging
 
 from numpy import mean
 
@@ -41,26 +42,31 @@ class TwentyFortyEight:
 
         # Returns False if no move found
         if next_move is None:
-            return False
+            return None
 
         # Makes the actual move
         self.game_board.make_player_move(next_move)
 
         # Returns that the move was legal
-        return True
+        return next_move
 
     def make_random_move(self):
         moves = [0, 1, 2, 3]
         moved = False
 
-        while not moved and len(moves) > 0:
+        while not moved:
             move = random.choice(moves)
             moved = self.game_board.make_player_move(move)
 
-            if not moved:
+            if moved:
+                return move
+            else:
                 moves.remove(move)
 
-        return moved
+                if not len(moves):
+                    return None
+
+        return None
 
     # Makes computer move
     def make_computer_move(self):
@@ -137,20 +143,35 @@ class TwentyFortyEight:
         }
 
     # Runs the 2048 solver
-    def run(self, move_function):
+    def run(self, move_function, save_moves=False):
         is_game_over = not self.make_computer_move()
+        moves = []
 
-        # Makes moves as long as the game isn't lost yet
-        while not is_game_over:
-            # Makes the move
-            moved = move_function()
+        try:
+            # Makes moves as long as the game isn't lost yet
+            while not is_game_over:
+                board_state = self.game_board.get_cell_values()
 
-            # Updates UI, if any
-            if moved and self.ui:
-                self.ui.update_ui(self.game_board.state)
+                # Makes the move
+                next_move = move_function()
 
-            # Spawns new value
-            is_game_over = not self.make_computer_move()
+                # Updates UI, if any
+                if next_move is not None:
+                    if self.ui:
+                        self.ui.update_ui(self.game_board.state)
+
+                    if save_moves:
+                        logging.info('Move made: %d' % next_move)
+
+                        moves.append([board_state, next_move])
+
+                # Spawns new value
+                is_game_over = not self.make_computer_move()
+        except KeyboardInterrupt:
+            pass
 
         # Returns final score
-        return 2 ** self.game_board.get_max_value()
+        if save_moves:
+            return moves
+        else:
+            return 2 ** self.game_board.get_max_value()
