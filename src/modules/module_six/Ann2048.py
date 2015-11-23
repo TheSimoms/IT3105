@@ -16,8 +16,8 @@ TRAINING_DATA_FILENAME = 'generated-training-data.txt'
 
 
 class Ann2048:
-    def __init__(self, hidden_layer_sizes, activation_functions, number_of_inputs=16, number_of_outputs=4,
-                 learning_rate=0.1, error_limit=1e-3, batch_size=100, max_epochs=100, height=800):
+    def __init__(self, hidden_layer_sizes, activation_functions, max_epochs, number_of_inputs=16, number_of_outputs=4,
+                 learning_rate=0.1, error_limit=1e-3, batch_size=100, height=800):
         self.ann = Ann(hidden_layer_sizes, activation_functions, number_of_inputs, number_of_outputs,
                        learning_rate, error_limit, batch_size, max_epochs)
 
@@ -59,6 +59,8 @@ class Ann2048:
         return kd_reduce(flatten, nested_list)
 
     def pre_process(self, feature_sets):
+        feature_sets = self.ann.normalize_feature_sets(feature_sets, 15.0)
+
         return feature_sets
 
     def train(self, filename=TRAINING_DATA_FILENAME_INTEGER, filename2=None):

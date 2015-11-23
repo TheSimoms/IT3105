@@ -221,6 +221,8 @@ class Ann:
             for i in range(dimensions):
                 feature_set[i] /= max_value
 
+        return feature_sets
+
     @staticmethod
     def load_data(filename):
         """
