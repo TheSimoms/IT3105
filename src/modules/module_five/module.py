@@ -22,20 +22,20 @@ class ModuleFive:
 
 
 def demo(r):
-    results = ModuleFive([784, 360, 100], [T.tanh, T.tanh, T.tanh]).run(r)
+    results = ModuleFive([784, 392, 196], [T.tanh, T.tanh, T.tanh]).run(r)
 
     logging.info('Scores: %s' % str(results[0]))
     logging.info('Epochs: %s, accuracy: %s' % (str(results[1]), str(results[2])))
 
 
-def test_configurations(number_of_runs=20):
+def test_configurations(number_of_runs=5):
     results = eval(repr([[0]*5]*5))
     configurations = [
-        [[784, 360, 100], [T.tanh, T.tanh, T.tanh]],
-        [[360, 100], [T.tanh, T.tanh]],
-        [[500, 250, 50], [T.tanh, T.tanh, T.tanh]],
+        [[200, 100], [T.tanh, T.tanh]],
         [[100, 200, 100], [T.tanh, T.tanh, T.tanh]],
-        [[50, 100, 100], [T.tanh, T.tanh, T.tanh]],
+        [[100, 250, 50], [T.tanh, T.tanh, T.tanh]],
+        [[392, 196, 98], [T.tanh, T.tanh, T.tanh]],
+        [[784, 392, 196], [T.tanh, T.tanh, T.tanh]]
     ]
 
     for i in range(len(configurations)):

@@ -41,7 +41,7 @@ class Ann:
             self.hidden_layers[-1].output, hidden_layer_sizes[-1], number_of_outputs
         )
 
-        self.training_function, self.testing_function = self.generate_functions()
+        self.training_function, self.testing_function, self.testing_function_list = self.generate_functions()
 
     @staticmethod
     def generate_hidden_layers(input_values, number_of_inputs, hidden_layer_sizes, activation_functions):
@@ -107,7 +107,13 @@ class Ann:
             allow_input_downcast=True
         )
 
-        return training_function, testing_function
+        testing_function_list = theano.function(
+            inputs=[self.input_values],
+            outputs=self.output_layer.output,
+            allow_input_downcast=True
+        )
+
+        return training_function, testing_function, testing_function_list
 
     def start_training(self, feature_sets, correct_labels):
         """
@@ -149,7 +155,7 @@ class Ann:
 
         return epoch, mean_accuracy
 
-    def train(self, filename='training-data.txt'):
+    def train(self, filename='generated-training-data.txt'):
         """
         Train the network using data in supplied file
 
@@ -225,10 +231,10 @@ class Ann:
         with open(filename, 'r') as f:
             for line in f.readlines():
                 line = line.strip()
-                content = line.split(',')
+                content = line.split(' ')
 
-                feature_sets.append(int(content[0]))
-                correct_labels.append(content[1])
+                feature_sets.append([int(element) for element in eval(content[0])])
+                correct_labels.append(int(content[1]))
 
         return feature_sets, correct_labels
 
