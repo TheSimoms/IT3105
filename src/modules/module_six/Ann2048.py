@@ -59,11 +59,13 @@ class Ann2048:
         return kd_reduce(flatten, nested_list)
 
     def pre_process(self, feature_sets):
-        feature_sets = self.ann.normalize_feature_sets(feature_sets, 15.0)
+        max_value = max(map(max, feature_sets))
+
+        feature_sets = self.ann.normalize_feature_sets(feature_sets, float(max_value))
 
         return feature_sets
 
-    def train(self, filename=TRAINING_DATA_FILENAME, filename_integer=None):
+    def train(self, filename, filename_integer):
         """
         Train the network using supplied file
 
@@ -85,7 +87,7 @@ class Ann2048:
             feature_sets += feature_sets1
             correct_labels += correct_labels1
 
-        feature_sets = self.pre_process(feature_sets)
+        # feature_sets = self.pre_process(feature_sets)
 
         self.ann.start_training(feature_sets, correct_labels)
 
@@ -180,7 +182,7 @@ class Ann2048:
 
         return result
 
-    def run(self):
+    def run(self, filename=TRAINING_DATA_FILENAME, filename_integer=TRAINING_DATA_FILENAME_INTEGER):
         """
         Run the module. Play 2048 50 times using random player, then 50 times using the neural network. Report results.
 
@@ -199,7 +201,7 @@ class Ann2048:
         logging.info('Completed playing the random games. Mean highest value: %f' % numpy.mean(results[0]))
 
         # Training the neural network
-        self.train()
+        self.train(filename, filename_integer)
 
         # Playing using the neural network
         for i in range(50):
