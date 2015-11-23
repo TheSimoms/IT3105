@@ -28,8 +28,8 @@ class Ui:
             (0, 0, 0)
         ]
 
-        self.cell_size = height / 4
-        self.font_size = self.cell_size / 3
+        self.cell_size = int(height / 4)
+        self.font_size = int(self.cell_size / 3)
 
         self.window_size = [height, self.cell_size * 4]
 

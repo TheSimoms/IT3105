@@ -12,7 +12,9 @@ class ModuleFour:
         self.run()
 
     def run(self):
-        TwentyFortyEight(ui=self.ui).run()
+        twenty_forty_eight = TwentyFortyEight(ui=self.ui)
+
+        twenty_forty_eight.run(twenty_forty_eight.make_player_move)
 
         try:
             input('Done. Press return to continue')

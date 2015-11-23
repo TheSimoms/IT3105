@@ -1,3 +1,5 @@
+import random
+
 from numpy import mean
 
 from modules.module_four.game_board import GameBoard, Cell
@@ -44,12 +46,21 @@ class TwentyFortyEight:
         # Makes the actual move
         self.game_board.make_player_move(next_move)
 
-        # Updates UI, if any
-        if self.ui:
-            self.ui.update_ui(self.game_board.state)
-
         # Returns that the move was legal
         return True
+
+    def make_random_move(self):
+        moves = [0, 1, 2, 3]
+        moved = False
+
+        while not moved and len(moves) > 0:
+            move = random.choice(moves)
+            moved = self.game_board.make_player_move(move)
+
+            if not moved:
+                moves.remove(move)
+
+        return moved
 
     # Makes computer move
     def make_computer_move(self):
@@ -126,13 +137,17 @@ class TwentyFortyEight:
         }
 
     # Runs the 2048 solver
-    def run(self):
+    def run(self, move_function):
         is_game_over = not self.make_computer_move()
 
         # Makes moves as long as the game isn't lost yet
         while not is_game_over:
             # Makes the move
-            self.make_player_move()
+            moved = move_function()
+
+            # Updates UI, if any
+            if moved and self.ui:
+                self.ui.update_ui(self.game_board.state)
 
             # Spawns new value
             is_game_over = not self.make_computer_move()
