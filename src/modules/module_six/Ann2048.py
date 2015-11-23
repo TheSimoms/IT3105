@@ -87,7 +87,7 @@ class Ann2048:
             feature_sets += feature_sets1
             correct_labels += correct_labels1
 
-        # feature_sets = self.pre_process(feature_sets)
+        feature_sets = self.pre_process(feature_sets)
 
         self.ann.start_training(feature_sets, correct_labels)
 
@@ -218,18 +218,19 @@ class Ann2048:
         :param filename: Filename to save the results to
         """
 
-        logging.info('Starting AI run')
+        while True:
+            logging.info('Starting AI run')
 
-        twenty_forty_eight = TwentyFortyEight()
-        moves = twenty_forty_eight.run(twenty_forty_eight.make_player_move, True)
+            twenty_forty_eight = TwentyFortyEight()
+            moves = twenty_forty_eight.run(twenty_forty_eight.make_player_move, True)
 
-        logging.info('AI run completed. Saving to file')
+            logging.info('AI run completed. Saving to file')
 
-        with open(filename, 'w') as f:
-            for move in moves:
-                game_board = self.flatten_list(move[0])
-                move_made = move[1]
+            with open(filename, 'a') as f:
+                for move in moves:
+                    game_board = self.flatten_list(move[0])
+                    move_made = move[1]
 
-                f.write('[%s] %d\n' % (','.join([str(element) for element in game_board]), move_made))
+                    f.write('[%s] %d\n' % (','.join([str(element) for element in game_board]), move_made))
 
-        logging.info('Moves successfully saved to file %s' % filename)
+            logging.info('Moves successfully saved to file %s' % filename)

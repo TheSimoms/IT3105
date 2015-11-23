@@ -11,12 +11,12 @@ from modules.module_six.ai2048demo import welch
 
 
 class ModuleSix:
-    def __init__(self, hidden_layer_sizes, activation_functions, max_epochs=50, learning_rate=0.1, error_limit=1e-3):
+    def __init__(self, hidden_layer_sizes, activation_functions, max_epochs=30, learning_rate=0.01, error_limit=1e-3):
         self.ann_2048 = Ann2048(hidden_layer_sizes, activation_functions, learning_rate=learning_rate,
                                 error_limit=error_limit, max_epochs=max_epochs)
 
     def run(self):
-        results = self.ann_2048.run(filename=None)
+        results = self.ann_2048.run(filename_integer=None)
         welch_results = welch(results[0], results[1])
 
         logging.info('Results: %s' % str(results))
@@ -25,7 +25,7 @@ class ModuleSix:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
-    module = ModuleSix([1024, 512], [T.nnet.softplus, T.nnet.softplus])
+    module = ModuleSix([1024, 512], [T.tanh, T.tanh])
 
     if len(sys.argv) > 1 and sys.argv[1] == 'train':
         module.ann_2048.generate_training_data()
