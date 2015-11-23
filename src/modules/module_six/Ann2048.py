@@ -16,10 +16,10 @@ TRAINING_DATA_FILENAME = 'generated-training-data.txt'
 
 
 class Ann2048:
-    def __init__(self, hidden_layer_sizes, activation_functions, max_epochs, number_of_inputs=16, number_of_outputs=4,
-                 learning_rate=0.1, error_limit=1e-3, batch_size=100, height=800):
-        self.ann = Ann(hidden_layer_sizes, activation_functions, number_of_inputs, number_of_outputs,
-                       learning_rate, error_limit, batch_size, max_epochs)
+    def __init__(self, hidden_layer_sizes, activation_functions, max_epochs, learning_rate, error_limit,
+                 batch_size=100, height=800):
+        self.ann = Ann(hidden_layer_sizes, activation_functions, 16, 4, learning_rate, error_limit,
+                       batch_size, max_epochs)
 
         self.height = height
 
