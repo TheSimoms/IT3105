@@ -64,7 +64,7 @@ class Ann2048:
     def pre_process(self, feature_sets):
         for feature_set in feature_sets:
             for i in range(len(feature_set)):
-                feature_set[i] = 2 ** feature_set[i]
+                feature_set[i] *= feature_set[i]
 
         return feature_sets
 
