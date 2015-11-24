@@ -25,7 +25,7 @@ class ModuleSix:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
-    module = ModuleSix([1024, 512], [T.tanh, T.tanh])
+    module = ModuleSix([160, 320, 160], [T.tanh, T.tanh, T.tanh])
 
     if len(sys.argv) > 1 and sys.argv[1] == 'train':
         module.ann_2048.generate_training_data()

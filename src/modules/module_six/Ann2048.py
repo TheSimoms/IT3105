@@ -59,10 +59,6 @@ class Ann2048:
         return kd_reduce(flatten, nested_list)
 
     def pre_process(self, feature_sets):
-        max_value = max(map(max, feature_sets))
-
-        feature_sets = self.ann.normalize_feature_sets(feature_sets, float(max_value))
-
         return feature_sets
 
     def train(self, filename, filename_integer):
