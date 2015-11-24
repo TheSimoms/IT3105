@@ -11,7 +11,7 @@ from modules.module_six.ai2048demo import welch
 
 
 class ModuleSix:
-    def __init__(self, hidden_layer_sizes, activation_functions, max_epochs=30, learning_rate=0.01, error_limit=1e-3):
+    def __init__(self, hidden_layer_sizes, activation_functions, max_epochs=100, learning_rate=0.01, error_limit=1e-3):
         self.ann_2048 = Ann2048(hidden_layer_sizes, activation_functions, learning_rate=learning_rate,
                                 error_limit=error_limit, max_epochs=max_epochs)
 
