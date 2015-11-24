@@ -16,7 +16,7 @@ class ModuleSix:
                                 error_limit=error_limit, max_epochs=max_epochs)
 
     def run(self):
-        results = self.ann_2048.run(filename_integer=None)
+        results = self.ann_2048.run()
         welch_results = welch(results[0], results[1])
 
         logging.info('Results: %s' % str(results))
@@ -27,7 +27,10 @@ if __name__ == '__main__':
 
     module = ModuleSix([160, 320, 160], [T.tanh, T.tanh, T.tanh])
 
-    if len(sys.argv) > 1 and sys.argv[1] == 'train':
-        module.ann_2048.generate_training_data()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'train':
+            module.ann_2048.generate_training_data()
+        elif sys.argv[1] == 'statistics':
+            module.ann_2048.generate_statistics()
     else:
         module.run()

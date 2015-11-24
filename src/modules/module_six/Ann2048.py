@@ -10,17 +10,21 @@ from common.ann.ann import Ann
 from modules.module_four.twenty_forty_eight import TwentyFortyEight
 
 
-TRAINING_DATA_FILENAME_INTEGER = 'training-data.txt'
 TRAINING_DATA_FILENAME = 'generated-training-data.txt'
 
 
 class Ann2048:
     def __init__(self, hidden_layer_sizes, activation_functions, max_epochs, learning_rate, error_limit,
-                 batch_size=100, height=800):
+                 batch_size=100):
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.activation_functions = activation_functions
+        self.max_epochs = max_epochs
+        self.learning_rate = learning_rate
+        self.error_limit = error_limit
+        self.batch_size = batch_size
+
         self.ann = Ann(hidden_layer_sizes, activation_functions, 16, 4, learning_rate, error_limit,
                        batch_size, max_epochs)
-
-        self.height = height
 
     @staticmethod
     def nest_list(flat_list):
@@ -58,29 +62,20 @@ class Ann2048:
         return kd_reduce(flatten, nested_list)
 
     def pre_process(self, feature_sets):
+        for feature_set in feature_sets:
+            for i in range(len(feature_set)):
+                feature_set[i] = 2 ** feature_set[i]
+
         return feature_sets
 
-    def train(self, filename, filename_integer):
+    def train(self, filename):
         """
         Train the network using supplied file
 
         :param filename: Filename containing training data
         """
 
-        feature_sets = []
-        correct_labels = []
-
-        if filename:
-            feature_sets1, correct_labels1 = self.ann.load_data(filename)
-
-            feature_sets += feature_sets1
-            correct_labels += correct_labels1
-
-        if filename_integer:
-            feature_sets1, correct_labels1 = self.load_integer_formatted_data(filename_integer)
-
-            feature_sets += feature_sets1
-            correct_labels += correct_labels1
+        feature_sets, correct_labels = self.ann.load_data(filename)
 
         feature_sets = self.pre_process(feature_sets)
 
@@ -177,7 +172,7 @@ class Ann2048:
 
         return result
 
-    def run(self, filename=TRAINING_DATA_FILENAME, filename_integer=TRAINING_DATA_FILENAME_INTEGER):
+    def run(self, filename=TRAINING_DATA_FILENAME):
         """
         Run the module. Play 2048 50 times using random player, then 50 times using the neural network. Report results.
 
@@ -196,13 +191,38 @@ class Ann2048:
         logging.info('Completed playing the random games. Mean highest value: %f' % numpy.mean(results[0]))
 
         # Training the neural network
-        self.train(filename, filename_integer)
+        self.train(filename)
 
         # Playing using the neural network
         for i in range(50):
             results[1].append(self.play_intelligently())
 
         logging.info('Completed playing the intelligent games. Mean highest value: %f' % numpy.mean(results[1]))
+
+        return results
+
+    def generate_statistics(self, filename=TRAINING_DATA_FILENAME):
+        """
+        Run the module. Play 2048 50 times using random player, then 50 times using the neural network. Report results.
+
+        :return: Results from all 100 playings, in two lists. One list for random, and one for intelligent
+        """
+
+        results = []
+
+        try:
+            for _ in range(50):
+                # Training the neural network
+                self.ann = Ann(self.hidden_layer_sizes, self.activation_functions, 16, 4, self.learning_rate,
+                               self.error_limit, self.batch_size, self.max_epochs)
+                self.train(filename)
+
+                # Playing using the neural network
+                results.append(self.play_intelligently())
+        except KeyboardInterrupt:
+            pass
+
+        logging.info('Completed playing the intelligent games. Mean highest value: %f' % numpy.mean(results))
 
         return results
 
@@ -254,4 +274,4 @@ class Ui:
 
             string += '|\n%s' % divider
 
-        print(string)
+        logging.info(string)
