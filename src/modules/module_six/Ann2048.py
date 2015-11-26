@@ -7,7 +7,8 @@ sys.path.append('../../')
 
 from common.ann.ann import Ann
 
-from modules.module_four.twenty_forty_eight import TwentyFortyEight
+from common.twenty_forty_eight.twenty_forty_eight import TwentyFortyEight
+from common.twenty_forty_eight.ui_simple import Ui
 
 
 TRAINING_DATA_FILENAME = 'generated-training-data.txt'
@@ -249,29 +250,3 @@ class Ann2048:
                     f.write('[%s] %d\n' % (','.join([str(element) for element in game_board]), move_made))
 
             logging.info('Moves successfully saved to file %s' % filename)
-
-
-class Ui:
-    def __init__(self):
-        pass
-
-    def update_ui(self, state):
-        divider = '------------------\n'
-        string = str('\n%s' % divider)
-
-        for i in [0, 1, 2, 3]:
-            string += '|'
-
-            for j in [0, 1, 2, 3]:
-                cell = state[i][j]
-
-                if cell:
-                    char = '0%d' % cell.value if cell.value < 10 else str(cell.value)
-
-                    string += ' %s ' % char
-                else:
-                    string += '    '
-
-            string += '|\n%s' % divider
-
-        logging.info(string)

@@ -1,14 +1,15 @@
 import sys
+import logging
 
 sys.path.append('../../')
 
-from modules.module_four.twenty_forty_eight import TwentyFortyEight
-from modules.module_four.ui import Ui
+from common.twenty_forty_eight.twenty_forty_eight import TwentyFortyEight
+from common.twenty_forty_eight.ui_simple import Ui
 
 
 class ModuleFour:
-    def __init__(self, height=800):
-        self.ui = Ui(height)
+    def __init__(self):
+        self.ui = Ui()
         self.run()
 
     def run(self):
@@ -22,4 +23,6 @@ class ModuleFour:
             pass
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+
     ModuleFour()

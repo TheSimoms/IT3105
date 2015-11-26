@@ -3,7 +3,8 @@ import logging
 
 from numpy import mean
 
-from modules.module_four.game_board import GameBoard, Cell
+from common.twenty_forty_eight.game_board import GameBoard, Cell
+
 
 
 # Probabilities for spawning values
